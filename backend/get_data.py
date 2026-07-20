@@ -19,8 +19,14 @@ def get_default_player_data():
 
     else:
         print("Failed to return data")
-    
-    
 
-fpl_data = get_default_player_data()
-print(fpl_data["elements"][0])
+def get_fixture_data():
+    
+    url = f"{base_url}/fixtures/"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        fixture_data = response.json()
+        return fixture_data
+    else:
+        print("Failed to return data")

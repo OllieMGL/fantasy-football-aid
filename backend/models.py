@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
+
 
 class Team(Base):
     __tablename__ = "teams"
@@ -15,6 +16,17 @@ class Team(Base):
     #back_populates just lets SQL know they are in same relationship - keep them in sync
     players = relationship("Player", back_populates="team")
 
+class Fixture(Base):
+    __tablename__ = "fixtures"
+
+    id = Column(Integer, primary_key=True)
+    gameweek = Column(Integer) 
+    date = Column(DateTime) # date time - stores as an actual date 
+    home_team = Column(Integer, ForeignKey("teams.id"))
+    away_team = Column(Integer, ForeignKey("teams.id"))
+    team_h_difficulty = Column(Integer)
+    team_a_difficulty = Column(Integer)
+    finished = Column(Boolean)
 
 
 
