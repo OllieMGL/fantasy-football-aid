@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from models import Base, Player
+from models import Base, Player, Team
 
 engine = create_engine("sqlite:///fpl_advisor.db") # sets up the connection to SQLlite
 
