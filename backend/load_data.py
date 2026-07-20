@@ -20,7 +20,8 @@ fpl_data = get_default_player_data()
 for element in fpl_data["elements"]:
     player = Player(
         id=element["id"],
-        web_name=element["web_name"],
+        first_name=element["first_name"],
+        second_name=element["second_name"],
         team=element["team"],
         position=Positions[element["element_type"]],
         now_cost=element["now_cost"] / 10,   # FPL stores price as 125 meaning £12.5m

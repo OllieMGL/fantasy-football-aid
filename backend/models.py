@@ -7,7 +7,8 @@ class Player(Base):
     __tablename__ = "players"
 
     id = Column(Integer, primary_key=True)
-    web_name = Column(String)
+    first_name = Column(String)
+    second_name = Column(String)
     team = Column(Integer)
     position = Column(String)
     now_cost = Column(Float)
