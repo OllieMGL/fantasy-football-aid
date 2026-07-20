@@ -44,3 +44,52 @@ class Player(Base):
 
     # allows you to write something like some_player.team... 
     team = relationship("Team", back_populates="players")
+
+
+class GoalkeeperStats(Base):
+    __tablename__ = "goalkeeper_stats"
+
+    player_id = Column(Integer, ForeignKey("players.id"), primary_key=True)
+    saves = Column(Integer)
+    clean_sheets = Column(Integer)
+    goals_conceded = Column(Integer)
+    penalties_saved = Column(Integer)
+    yellow_cards = Column(Integer)
+    red_cards = Column(Integer)
+
+
+class DefenderStats(Base):
+    __tablename__ = "defender_stats"
+
+    player_id = Column(Integer, ForeignKey("players.id"), primary_key=True)
+    clean_sheets = Column(Integer)
+    goals_conceded = Column(Integer)
+    expected_goals_conceded = Column(Float)
+    own_goals = Column(Integer)
+    yellow_cards = Column(Integer)
+    red_cards = Column(Integer)
+
+
+class MidfielderStats(Base):
+    __tablename__ = "midfielder_stats"
+
+    player_id = Column(Integer, ForeignKey("players.id"), primary_key=True)
+    goals_scored = Column(Integer)
+    assists = Column(Integer)
+    expected_goals = Column(Float)
+    expected_assists = Column(Float)
+    creativity = Column(Float)
+    yellow_cards = Column(Integer)
+    red_cards = Column(Integer)
+
+
+class ForwardStats(Base):
+    __tablename__ = "forward_stats"
+
+    player_id = Column(Integer, ForeignKey("players.id"), primary_key=True)
+    goals_scored = Column(Integer)
+    expected_goals = Column(Float)
+    threat = Column(Float)
+    penalties_missed = Column(Integer)
+    yellow_cards = Column(Integer)
+    red_cards = Column(Integer)

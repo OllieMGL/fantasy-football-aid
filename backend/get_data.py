@@ -6,11 +6,13 @@ import requests
 # 3 = midfielder
 # 4 = forward
 
+# NEED TO REPOPULATE / RESET DATABASE FOR NEW SEASON - currently have 25/26 season data
 
-base_url = "https://fantasy.premierleague.com/api"
 
-def get_default_player_data():
-    url = f"{base_url}/bootstrap-static/"
+BASE_URL = "https://fantasy.premierleague.com/api"
+
+def get_default_data():
+    url = f"{BASE_URL}/bootstrap-static/"
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -22,7 +24,7 @@ def get_default_player_data():
 
 def get_fixture_data():
     
-    url = f"{base_url}/fixtures/"
+    url = f"{BASE_URL}/fixtures/"
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -30,3 +32,17 @@ def get_fixture_data():
         return fixture_data
     else:
         print("Failed to return data")
+
+
+def get_player_by_ID(playerID):
+    
+    url = f"{BASE_URL}/element-summary/{playerID}/"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        player_data = response.json()
+        return player_data
+    else:
+        print("Failed to return data")
+
+

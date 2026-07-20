@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
-from models import Base, Player, Team, Fixture
+from models import Base, Player, Team, Fixture, GoalkeeperStats, DefenderStats, MidfielderStats, ForwardStats
 from db import engine
-from get_data import get_default_player_data, get_fixture_data
+from get_data import get_default_data, get_fixture_data
 from datetime import datetime
 
 Positions = {
@@ -16,7 +16,7 @@ Positions = {
 Session = sessionmaker(bind=engine) 
 session = Session()
 
-fpl_data = get_default_player_data()
+fpl_data = get_default_data()
 fixture_data = get_fixture_data()
 
 for team_data in fpl_data["teams"]:
@@ -36,7 +36,7 @@ for fixture_data in fixture_data:
 
     # need to check if it exists, some games dates are yet to be determined. 
     if kickoff_raw is not None:
-        kickoff = datetime.fromisoformat(kickoff_raw.replace("Z", "+00:00"))
+        kickoff = datetime.fromisoformat(kickoff_raw)
     else:
         kickoff = None
     
@@ -55,6 +55,9 @@ for fixture_data in fixture_data:
 
 
 for element in fpl_data["elements"]:
+
+    position = Positions[element["element_type"]]
+
     player = Player(
         id=element["id"],
         first_name=element["first_name"],
@@ -66,6 +69,54 @@ for element in fpl_data["elements"]:
         form=float(element["form"]),
     )
     session.add(player)
+
+    if position == "GKP":
+        session.add(GoalkeeperStats(
+            player_id=element["id"],
+            saves=element["saves"],
+            clean_sheets=element["clean_sheets"],
+            goals_conceded=element["goals_conceded"],
+            penalties_saved=element["penalties_saved"],
+            yellow_cards=element["yellow_cards"],
+            red_cards=element["red_cards"]
+        ))
+
+    elif position == "DEF":
+        session.add(DefenderStats(
+            player_id=element["id"],
+            clean_sheets=element["clean_sheets"],
+            goals_conceded=element["goals_conceded"],
+            expected_goals_conceded=float(element["expected_goals_conceded"]),
+            own_goals=element["own_goals"],
+            yellow_cards=element["yellow_cards"],
+            red_cards=element["red_cards"]
+        ))
+
+    elif position == "MID":
+        session.add(MidfielderStats(
+            player_id=element["id"],
+            goals_scored=element["goals_scored"],
+            assists=element["assists"],
+            expected_goals=float(element["expected_goals"]),
+            expected_assists=float(element["expected_assists"]),
+            creativity=float(element["creativity"]),
+            yellow_cards=element["yellow_cards"],
+            red_cards=element["red_cards"]
+        ))
+
+    elif position == "FWD":
+        session.add(ForwardStats(
+            player_id=element["id"],
+            goals_scored=element["goals_scored"],
+            expected_goals=float(element["expected_goals"]),
+            threat=float(element["threat"]),
+            penalties_missed=element["penalties_missed"],
+            yellow_cards=element["yellow_cards"],
+            red_cards=element["red_cards"]
+        ))
+
+
+
 
 session.commit() #writes the data into the database
 
