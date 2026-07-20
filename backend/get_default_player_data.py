@@ -1,5 +1,12 @@
 import requests
 
+#postion key in the fpl API
+# 1 = goalkeeper 
+# 2 = defender 
+# 3 = midfielder
+# 4 = forward
+
+
 base_url = "https://fantasy.premierleague.com/api"
 
 def get_default_player_data():
@@ -16,3 +23,4 @@ def get_default_player_data():
     
 
 fpl_data = get_default_player_data()
+print(fpl_data["elements"][0])
