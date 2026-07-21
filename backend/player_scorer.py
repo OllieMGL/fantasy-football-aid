@@ -2,9 +2,6 @@ from sqlalchemy.orm import sessionmaker
 from db import engine
 from models import Player
 
-
-
-
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -30,52 +27,74 @@ GOALKEEPER_WEIGHTS = {
     "cards": 0.02,            # punish
 }
 
-goalkeepers = (
-    session.query(Player)
-    .filter(Player.position == "GKP")
-    .all()
-)
+def get_goalkeepers(session):
+    goalkeepers = (
+        session.query(Player)
+        .filter(Player.position == "GKP")
+        .all()
+    )
+    return goalkeepers
 
-# creating a python list for each stat from every goalkeeper
-clean_sheets_values = [p.goalkeeper_stats.clean_sheets for p in goalkeepers]
-saves_values = [p.goalkeeper_stats.saves for p in goalkeepers]
-goals_conceded_values = [p.goalkeeper_stats.goals_conceded for p in goalkeepers]
-penalties_saved_values = [p.goalkeeper_stats.penalties_saved for p in goalkeepers]
-total_points_values = [p.total_points for p in goalkeepers]
-form_values = [p.form for p in goalkeepers]
-# cards handled in one for simplcity, red card * 3 as is worse than yellow 
-cards_values = [
-    p.goalkeeper_stats.yellow_cards + (p.goalkeeper_stats.red_cards * 3)
-    for p in goalkeepers
-]
-# need to calculate the "value"
-value_values = [
-    p.total_points / p.now_cost for p in goalkeepers
-]
+def calculate_ranges(goalkeepers):
+
+    #Returns a dict of (min, max) tuples for every stat we need to normalize.
+    cards_values = [
+        p.goalkeeper_stats.yellow_cards + (p.goalkeeper_stats.red_cards * 3)
+        for p in goalkeepers
+    ]
+    value_values = [p.total_points / p.now_cost for p in goalkeepers]
+
+    ranges = {
+        "clean_sheets": [p.goalkeeper_stats.clean_sheets for p in goalkeepers],
+        "saves": [p.goalkeeper_stats.saves for p in goalkeepers],
+        "goals_conceded": [p.goalkeeper_stats.goals_conceded for p in goalkeepers],
+        "penalties_saved": [p.goalkeeper_stats.penalties_saved for p in goalkeepers],
+        "total_points": [p.total_points for p in goalkeepers],
+        "form": [p.form for p in goalkeepers],
+        "value": value_values,
+        "cards": cards_values
+    }
+
+#     "clean_sheets": (0, 15), (returns this)
+#     "saves": (30, 102)...
+
+    final_ranges = {}
+
+    for stat_name, values in ranges.items():
+        minimum = min(values)
+        maximum = max(values)
+        final_ranges[stat_name] = (minimum, maximum)
+
+    return final_ranges
+
+
 
 def normalise(value, min_value, max_value):
     if max_value == min_value:
         return 0.5 # everyone identical - avoid dividing by zero
     return (value - min_value) / (max_value - min_value)
 
-goalkeeper_scores = {}
 
-for i in goalkeepers:
-    stats = i.goalkeeper_stats
 
+def score_goalkeeper(player, ranges):
+
+    stats = player.goalkeeper_stats
     cards = stats.yellow_cards + (stats.red_cards * 3)
-    value = i.total_points / i.now_cost
+    value = player.total_points / player.now_cost
 
-    normalised_clean_sheets = normalise(stats.clean_sheets, min(clean_sheets_values), max(clean_sheets_values))
-    normalised_total_points = normalise(i.total_points, min(total_points_values), max(total_points_values))
-    normalised_form = normalise(i.form, min(form_values), max(form_values))
-    normalised_value = normalise(value, min(value_values), max(value_values))
-    normalised_saves = normalise(stats.saves, min(saves_values), max(saves_values))
-    normalised_penalties_saved = normalise(stats.penalties_saved, min(penalties_saved_values), max(penalties_saved_values))
+    # the  * unpacks the min max values from ranges sos it can be readily used
+    # same thing as: normalise(value, range["value"][0], range["value"][1])
+    
+    normalised_clean_sheets = normalise(stats.clean_sheets, *ranges["clean_sheets"])
+    normalised_total_points = normalise(player.total_points, *ranges["total_points"])
+    normalised_form = normalise(player.form, *ranges["form"])
+    normalised_value = normalise(value, *ranges["value"])
+    normalised_saves = normalise(stats.saves, *ranges["saves"])
+    normalised_penalties_saved = normalise(stats.penalties_saved, *ranges["penalties_saved"])
 
-    # punish stats ==> 1 - x
-    normalised_goals_conceded = 1 - normalise(stats.goals_conceded, min(goals_conceded_values), max(goals_conceded_values))
-    normalised_cards = 1 - normalise(cards, min(cards_values), max(cards_values))
+    #punish stats 1 - x
+    normalised_goals_conceded = 1 - normalise(stats.goals_conceded, *ranges["goals_conceded"])
+    normalised_cards = 1 - normalise(cards, *ranges["cards"])
 
     score = (
         GOALKEEPER_WEIGHTS["clean_sheets"] * normalised_clean_sheets
@@ -88,12 +107,28 @@ for i in goalkeepers:
         + GOALKEEPER_WEIGHTS["cards"] * normalised_cards
     )
 
-    goalkeeper_scores[i.id] = round(score * 100, 1)
+    return round(score * 100, 1)
 
-# Sort and print the top 5, to sanity check the results
+def score_all_goalkeepers(session):
+    goalkeepers = get_goalkeepers(session)
+    ranges = calculate_ranges(goalkeepers)
 
-top_5 = sorted(goalkeeper_scores.items(), key=lambda item: item[1], reverse=True)[:5]
+    scores = {}
 
-for player_id, score in top_5:
-    player = next(p for p in goalkeepers if p.id == player_id)
-    print(player.first_name, player.second_name, "-", score)
+    for i in goalkeepers:
+        player_score = score_goalkeeper(i, ranges)
+        scores[i.id] = player_score
+    return scores
+
+
+def goalkeepers_main():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    goalkeepers = get_goalkeepers(session)
+    scores = score_all_goalkeepers(session)
+
+    for p in goalkeepers:
+        print(p.first_name, p.second_name, "-", scores[p.id])
+
+goalkeepers_main()
