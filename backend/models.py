@@ -44,6 +44,11 @@ class Player(Base):
 
     # allows you to write something like some_player.team... 
     team = relationship("Team", back_populates="players")
+    
+    goalkeeper_stats = relationship("GoalkeeperStats", uselist=False)
+    defender_stats = relationship("DefenderStats", uselist=False)
+    midfielder_stats = relationship("MidfielderStats", uselist=False)
+    forward_stats = relationship("ForwardStats", uselist=False)
 
 
 class GoalkeeperStats(Base):
