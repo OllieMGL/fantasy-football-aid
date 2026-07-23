@@ -102,3 +102,4 @@ class ForwardStats(Base):
     penalties_missed = Column(Integer)
     yellow_cards = Column(Integer)
     red_cards = Column(Integer)
+    assists = Column(Integer)

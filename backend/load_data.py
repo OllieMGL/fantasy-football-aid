@@ -116,7 +116,8 @@ for element in fpl_data["elements"]:
             threat=float(element["threat"]),
             penalties_missed=element["penalties_missed"],
             yellow_cards=element["yellow_cards"],
-            red_cards=element["red_cards"]
+            red_cards=element["red_cards"],
+            assists=element["assists"]
         ))
 
 
