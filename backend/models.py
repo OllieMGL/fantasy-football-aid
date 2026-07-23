@@ -89,6 +89,7 @@ class MidfielderStats(Base):
     creativity = Column(Float)
     yellow_cards = Column(Integer)
     red_cards = Column(Integer)
+    clean_sheets = Column(Integer)
 
 
 class ForwardStats(Base):

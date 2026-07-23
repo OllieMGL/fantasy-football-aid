@@ -103,7 +103,9 @@ for element in fpl_data["elements"]:
             expected_assists=float(element["expected_assists"]),
             creativity=float(element["creativity"]),
             yellow_cards=element["yellow_cards"],
-            red_cards=element["red_cards"]
+            red_cards=element["red_cards"],
+            clean_sheets=element["clean_sheets"]
+
         ))
 
     elif position == "FWD":
