@@ -73,6 +73,9 @@ class DefenderStats(Base):
     own_goals = Column(Integer)
     yellow_cards = Column(Integer)
     red_cards = Column(Integer)
+    goals_scored = Column(Integer)
+    assists = Column(Integer)
+    
 
 
 class MidfielderStats(Base):

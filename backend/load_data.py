@@ -89,7 +89,9 @@ for element in fpl_data["elements"]:
             expected_goals_conceded=float(element["expected_goals_conceded"]),
             own_goals=element["own_goals"],
             yellow_cards=element["yellow_cards"],
-            red_cards=element["red_cards"]
+            red_cards=element["red_cards"],
+            goals_scored=element["goals_scored"],
+            assists=element["assists"],
         ))
 
     elif position == "MID":
