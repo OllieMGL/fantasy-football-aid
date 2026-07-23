@@ -1,11 +1,12 @@
 from models import Player
-from scorers.common import normalise
+from scorers.common import normalise, get_team_difficulties, normalised_fixture_difficulty_for
 
 # forward
-# - goals_scored ~ reward 25%
-# - total_points ~ reward 18%
-# - form ~ reward 14%
-# - expected_goals ~ reward 12%
+# - goals_scored ~ reward 22%
+# - total_points ~ reward 16%
+# - form ~ reward 12%
+# - expected_goals ~ reward 11%
+# - fixture_difficulty ~ punish 8%
 # - assists ~ reward 10%
 # - value (points / cost) ~ reward 10%
 # - threat ~ reward 6%
@@ -13,41 +14,16 @@ from scorers.common import normalise
 # - cards ~ punish 2%
 
 FORWARD_WEIGHTS = {
-    "goals_scored": 0.25,
-    "total_points": 0.18,
-    "form": 0.14,
-    "expected_goals": 0.12,
+    "goals_scored": 0.22,
+    "total_points": 0.16,
+    "form": 0.12,
+    "expected_goals": 0.11,
+    "fixture_difficulty": 0.08,  # punish
     "assists": 0.10,
     "value": 0.10,
     "threat": 0.06,
-    "penalties_missed": 0.03,  # punish
-    "cards": 0.02,              # punish
-}
-
-from models import Player
-from scorers.common import normalise
-
-# forward
-# - goals_scored ~ reward 25%
-# - total_points ~ reward 18%
-# - form ~ reward 14%
-# - expected_goals ~ reward 12%
-# - assists ~ reward 10%
-# - value (points / cost) ~ reward 10%
-# - threat ~ reward 6%
-# - penalties_missed ~ punish 3%
-# - cards ~ punish 2%
-
-FORWARD_WEIGHTS = {
-    "goals_scored": 0.25,
-    "total_points": 0.18,
-    "form": 0.14,
-    "expected_goals": 0.12,
-    "assists": 0.10,
-    "value": 0.10,
-    "threat": 0.06,
-    "penalties_missed": 0.03,  # punish
-    "cards": 0.02,              # punish
+    "penalties_missed": 0.03,    # punish
+    "cards": 0.02,                # punish
 }
 
 
@@ -60,7 +36,14 @@ def get_forwards(session):
     return forwards
 
 
-def calculate_ranges(forwards):
+def calculate_ranges(forwards, session):
+    team_difficulties = get_team_difficulties(forwards, session)
+
+    fixture_difficulty_values = [
+        team_difficulties[p.team_id] for p in forwards
+        if team_difficulties[p.team_id] is not None
+    ]
+
     cards_values = [
         p.forward_stats.yellow_cards + (p.forward_stats.red_cards * 3)
         for p in forwards
@@ -77,6 +60,7 @@ def calculate_ranges(forwards):
         "threat": [p.forward_stats.threat for p in forwards],
         "penalties_missed": [p.forward_stats.penalties_missed for p in forwards],
         "cards": cards_values,
+        "fixture_difficulty": fixture_difficulty_values,
     }
 
     final_ranges = {}
@@ -86,10 +70,10 @@ def calculate_ranges(forwards):
         maximum = max(values)
         final_ranges[stat_name] = (minimum, maximum)
 
-    return final_ranges
+    return final_ranges, team_difficulties
 
 
-def score_forward(player, ranges):
+def score_forward(player, ranges, team_difficulties):
     stats = player.forward_stats
     cards = stats.yellow_cards + (stats.red_cards * 3)
     value = player.total_points / player.now_cost
@@ -106,6 +90,8 @@ def score_forward(player, ranges):
     normalised_penalties_missed = 1 - normalise(stats.penalties_missed, *ranges["penalties_missed"])
     normalised_cards = 1 - normalise(cards, *ranges["cards"])
 
+    normalised_fixture_difficulty = normalised_fixture_difficulty_for(player, ranges, team_difficulties)
+
     score = (
         FORWARD_WEIGHTS["goals_scored"] * normalised_goals_scored
         + FORWARD_WEIGHTS["total_points"] * normalised_total_points
@@ -116,6 +102,7 @@ def score_forward(player, ranges):
         + FORWARD_WEIGHTS["threat"] * normalised_threat
         + FORWARD_WEIGHTS["penalties_missed"] * normalised_penalties_missed
         + FORWARD_WEIGHTS["cards"] * normalised_cards
+        + FORWARD_WEIGHTS["fixture_difficulty"] * normalised_fixture_difficulty
     )
 
     return round(score * 100, 1)
@@ -123,12 +110,12 @@ def score_forward(player, ranges):
 
 def score_all_forwards(session):
     forwards = get_forwards(session)
-    ranges = calculate_ranges(forwards)
+    ranges, team_difficulties = calculate_ranges(forwards, session)
 
     scores = {}
 
     for p in forwards:
-        player_score = score_forward(p, ranges)
+        player_score = score_forward(p, ranges, team_difficulties)
         scores[p.id] = player_score
 
     return scores

@@ -23,8 +23,8 @@ def main():
     forwards = get_forwards(session)
     forward_scores = score_all_forwards(session)
 
-    # for p in goalkeepers:
-    #     print(p.first_name, p.second_name, "-", goalkeeper_scores[p.id])
+    for p in goalkeepers:
+        print(p.first_name, p.second_name, "-", goalkeeper_scores[p.id])
 
     # for p in defenders:
     #     print(p.first_name, p.second_name, "-", defender_scores[p.id])
@@ -34,13 +34,13 @@ def main():
 
 
 
-    sorted_forwards = sorted(forward_scores.items(), key=lambda item: item[1], reverse=True)
-    top_20_forwards = sorted_forwards[:20]
+    # sorted_forwards = sorted(forward_scores.items(), key=lambda item: item[1], reverse=True)
+    # top_20_forwards = sorted_forwards[:20]
 
-    forwards_by_id = {p.id: p for p in forwards}
+    # forwards_by_id = {p.id: p for p in forwards}
 
-    for player_id, score in top_20_forwards:
-        player = forwards_by_id[player_id]
-        print(player.first_name, player.second_name, "-", score)
+    # for player_id, score in top_20_forwards:
+    #     player = forwards_by_id[player_id]
+    #     print(player.first_name, player.second_name, "-", score)
 
 main()

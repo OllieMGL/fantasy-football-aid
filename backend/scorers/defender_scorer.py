@@ -1,27 +1,29 @@
 from models import Player
-from scorers.common import normalise
+from scorers.common import normalise, get_team_difficulties, normalised_fixture_difficulty_for
 
 # defender
-# - clean_sheets ~ reward 25%
-# - total_points ~ reward 20%
-# - form ~ reward 15%
+# - clean_sheets ~ reward 22%
+# - total_points ~ reward 17%
+# - form ~ reward 14%
 # - expected_goals_conceded ~ punish 12%
 # - goals_scored + assists (combined) ~ reward 12%
-# - value (points / cost) ~ reward 8%
+# - fixture_difficulty ~ punish 8%
+# - value (points / cost) ~ reward 7%
+# - cards ~ punish 5%
 # - goals_conceded ~ punish 2%
 # - own_goals ~ punish 1%
-# - cards ~ punish 5%
 
 DEFENDER_WEIGHTS = {
-    "clean_sheets": 0.25,
-    "total_points": 0.20,
-    "form": 0.15,
+    "clean_sheets": 0.22,
+    "total_points": 0.17,
+    "form": 0.14,
     "expected_goals_conceded": 0.12,  # punish
-    "attacking_returns": 0.12,         # goals_scored + assists, combined
-    "value": 0.08,
-    "goals_conceded": 0.02,            # punish
-    "own_goals": 0.01,                 # punish
-    "cards": 0.05,                      # punish
+    "attacking_returns": 0.12,
+    "fixture_difficulty": 0.08,        # punish
+    "value": 0.07,
+    "cards": 0.05,                       # punish
+    "goals_conceded": 0.02,               # punish
+    "own_goals": 0.01,                     # punish
 }
 
 def get_defenders(session):
@@ -33,7 +35,14 @@ def get_defenders(session):
     return defenders
 
 
-def calculate_ranges(defenders):
+def calculate_ranges(defenders, session):
+
+    team_difficulties = get_team_difficulties(defenders, session)
+
+    fixture_difficulty_values = [
+        team_difficulties[p.team_id] for p in defenders
+        if team_difficulties[p.team_id] is not None
+    ]
 
     attacking_returns_values = [
         p.defender_stats.goals_scored + p.defender_stats.assists
@@ -56,6 +65,7 @@ def calculate_ranges(defenders):
         "goals_conceded": [p.defender_stats.goals_conceded for p in defenders],
         "own_goals": [p.defender_stats.own_goals for p in defenders],
         "cards": cards_values,
+        "fixture_difficulty": fixture_difficulty_values,
     }
 
     final_ranges = {}
@@ -71,9 +81,9 @@ def calculate_ranges(defenders):
         maximum = max(values)
         final_ranges[stat_name] = (minimum, maximum)
 
-    return final_ranges
+    return final_ranges, team_difficulties
 
-def score_defender(player, ranges):
+def score_defender(player, ranges, team_difficulties):
 
     stats = player.defender_stats
     attacking_returns = stats.goals_scored + stats.assists
@@ -92,6 +102,8 @@ def score_defender(player, ranges):
     normalised_own_goals = 1 - normalise(stats.own_goals, *ranges["own_goals"])
     normalised_cards = 1 - normalise(cards, *ranges["cards"])
 
+    normalised_fixture_difficulty = normalised_fixture_difficulty_for(player, ranges, team_difficulties)
+
     score = (
         DEFENDER_WEIGHTS["clean_sheets"] * normalised_clean_sheets
         + DEFENDER_WEIGHTS["total_points"] * normalised_total_points
@@ -102,6 +114,7 @@ def score_defender(player, ranges):
         + DEFENDER_WEIGHTS["goals_conceded"] * normalised_goals_conceded
         + DEFENDER_WEIGHTS["own_goals"] * normalised_own_goals
         + DEFENDER_WEIGHTS["cards"] * normalised_cards
+        + DEFENDER_WEIGHTS["fixture_difficulty"] * normalised_fixture_difficulty
     )
 
     return round(score * 100, 1) 
@@ -110,12 +123,12 @@ def score_defender(player, ranges):
 def score_all_defenders(session):
 
     defenders = get_defenders(session)
-    ranges = calculate_ranges(defenders)
+    ranges, team_difficulties = calculate_ranges(defenders, session)
 
     scores = {}
 
     for p in defenders:
-        player_score = score_defender(p, ranges)
+        player_score = score_defender(p, ranges, team_difficulties)
         scores[p.id] = player_score
 
     return scores
