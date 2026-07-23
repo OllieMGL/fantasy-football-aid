@@ -38,21 +38,61 @@ def score_team(player_ids, session):
     return round(team_average, 1)
 
 
-def main():
+def check_valid_team(players):
+    errors = []
 
-    selected_player_ids = [82, 377, 505, 31, 154, 480, 397, 165, 411, 346, 497, 539, 388] 
+    if len(players) != 15:
+        errors.append(f"Team must have exactly 15 players (found {len(players)}).")
+
+    required_counts = {"GKP": 2, "DEF": 5, "MID": 5, "FWD": 3}
+    position_counts = {"GKP": 0, "DEF": 0, "MID": 0, "FWD": 0}
+
+    for player in players:
+        position_counts[player.position] += 1
+
+    for position, required in required_counts.items():
+        if position_counts[position] != required:
+            errors.append(f"Need {required} {position}, but found {position_counts[position]}.")
+
+    total_cost = sum(p.now_cost for p in players)
+    if total_cost > 100.0:
+        errors.append(f"Team costs £{total_cost:.1f}m, which is over the £100.0m budget.")
+
+    team_counts = {}
+    for player in players:
+        if player.team_id not in team_counts:
+            team_counts[player.team_id] = 1
+        else:
+            team_counts[player.team_id] = team_counts[player.team_id] + 1
+
+    for team_id, count in team_counts.items():
+        if count > 3:
+            errors.append(f"Too many players from team_id {team_id} ({count}, max is 3).")
+
+    return errors
+
+
+def main():
+    selected_player_ids = [82, 201, 505, 31, 154, 480, 397, 165, 411, 346, 497, 539, 423, 338, 40]
 
     Session = sessionmaker(bind=engine)
     session = Session()
 
+    team_players = get_players_by_ids(selected_player_ids, session)
+
+    errors = check_valid_team(team_players)
+    if errors:
+        print("Team is invalid:")
+        for error in errors:
+            print(" -", error)
+        return
+
     team_average = score_team(selected_player_ids, session)
 
-    team_players = get_players_by_ids(selected_player_ids, session)
     for p in team_players:
         print(p.first_name, p.second_name)
-        
+
     print(f"\nOverall team score: {team_average}/100")
 
 
 main()
-
