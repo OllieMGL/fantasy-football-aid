@@ -1,5 +1,8 @@
+import SquadPitch from './components/SquadPitch'
+import './App.css'
+
 function App() {
-  return <h1>Hello World</h1>
+  return <SquadPitch />
 }
 
 export default App

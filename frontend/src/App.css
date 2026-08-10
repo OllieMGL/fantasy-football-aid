@@ -1,0 +1,41 @@
+.squad-pitch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 40px;
+}
+
+.position-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.shirt-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.shirt-icon {
+  width: 72px;
+  height: 72px;
+  fill: #d0d0d0;
+  stroke: #888;
+  stroke-width: 2;
+}
+
+.shirt-slot:hover .shirt-icon {
+  fill: #b8d8ff;
+}
+
+.shirt-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+}
