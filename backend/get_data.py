@@ -35,13 +35,35 @@ def get_fixture_data():
 
 
 def get_player_by_ID(playerID):
-    
+
     url = f"{BASE_URL}/element-summary/{playerID}/"
     response = requests.get(url)
 
     if response.status_code == 200:
         player_data = response.json()
         return player_data
+    else:
+        print("Failed to return data")
+
+
+def get_entry_data(team_id):
+    url = f"{BASE_URL}/entry/{team_id}/"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        entry_data = response.json()
+        return entry_data
+    else:
+        print("Failed to return data")
+
+
+def get_entry_picks(team_id, event_id):
+    url = f"{BASE_URL}/entry/{team_id}/event/{event_id}/picks/"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        picks_data = response.json()
+        return picks_data
     else:
         print("Failed to return data")
 
