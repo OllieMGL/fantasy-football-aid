@@ -39,3 +39,26 @@
   font-weight: bold;
   color: #555;
 }
+
+.picker-panel {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  text-align: center;
+}
+
+.player-list {
+  max-height: 240px;
+  overflow-y: auto;
+  text-align: left;
+  padding: 0;
+  margin: 8px 0;
+  list-style: none;
+}
+
+.player-list li {
+  padding: 4px 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
