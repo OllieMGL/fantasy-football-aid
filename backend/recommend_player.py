@@ -23,6 +23,9 @@ def get_all_scores(session):
     return all_scores
 
 def find_weakest_by_position(team_players, player_scores):
+    # will return a dictionary of..
+    # POSITION : Weakest player 
+    #e.g GKP : Kepa
     weakest = {}
 
     for player in team_players:
@@ -74,6 +77,8 @@ def get_recommendations(selected_player_ids, session):
     weakest_by_position = find_weakest_by_position(team_players, all_scores)
 
     recommendations = {}
+    # recommendations creates a nested dictionary - dictionary inside a dictionary 
+    # Key is position and the value is another dictionary containing the infomation below
 
     for position, weak_player in weakest_by_position.items():
         replacement = find_replacement(weak_player, session, all_scores, selected_player_ids)
@@ -91,6 +96,7 @@ def get_recommendations(selected_player_ids, session):
 def main():
     selected_player_ids = [82, 201, 505, 31, 154, 480, 397, 165, 411, 346, 497, 539, 423, 338, 40]
 
+    # creating the main session connecting to the database 
     Session = sessionmaker(bind=engine)
     session = Session()
 
