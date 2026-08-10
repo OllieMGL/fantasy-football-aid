@@ -6,7 +6,7 @@ from db import engine
 from models import Player
 from team_scorer import get_players_by_ids, score_team, check_valid_team
 from recommend_player import get_recommendations
-from import_team import import_team
+from import_team import import_team, TeamNotFoundError, NoCurrentGameweekError
 
 
 app = Flask(__name__)
@@ -97,10 +97,13 @@ def recommendations_endpoint():
     
 @app.route("/import-team/<int:team_id>", methods=["GET"])
 def import_team_endpoint(team_id):
-    result = import_team(team_id)
-
-    if result is None:
+    try:
+        result = import_team(team_id)
+        
+    except TeamNotFoundError:
         return jsonify({"error": f"Could not find FPL team with id {team_id}"}), 404
+    except NoCurrentGameweekError:
+        return jsonify({"error": "This team has no gameweek picks yet (season may not have started)."}), 409
 
     return jsonify(result)
 
