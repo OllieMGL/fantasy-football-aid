@@ -34,11 +34,6 @@ def find_weakest_by_position(team_players, player_scores):
 
     return weakest
 
-
-def get_score_for(player, all_scores):
-    return all_scores[player.id]
-
-
 def find_replacement(weak_player, session, all_scores, current_team_ids):
     
     min_price = weak_player.now_cost - 1
@@ -57,6 +52,9 @@ def find_replacement(weak_player, session, all_scores, current_team_ids):
 
     if not candidates:
         return None
+
+    def get_score_for(candidate):
+        return all_scores[candidate.id]
 
     best_candidate = max(candidates, key=get_score_for)
 
@@ -88,3 +86,26 @@ def get_recommendations(selected_player_ids, session):
         }
 
     return recommendations
+
+
+def main():
+    selected_player_ids = [82, 201, 505, 31, 154, 480, 397, 165, 411, 346, 497, 539, 423, 338, 40]
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    recommendations = get_recommendations(selected_player_ids, session)
+
+    for position, info in recommendations.items():
+        current = info["current_player"]
+        print(f"\n{position} - weakest player:")
+        print(f"  {current.first_name} {current.second_name} - {info['current_score']}")
+
+        replacement = info["suggested_replacement"]
+        if replacement is None:
+
+            print("  No better replacement found in a similar price range.")
+        else:
+            print(f"  Suggested upgrade: {replacement.first_name} {replacement.second_name} - {info['suggested_score']} (£{replacement.now_cost}m)")
+
+main()
