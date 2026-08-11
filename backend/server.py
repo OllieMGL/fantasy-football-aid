@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from db import engine
 from models import Player
 from team_scorer import get_players_by_ids, score_team, check_valid_team
-from recommend_player import get_recommendations
+from recommend_player import get_recommendations, recommend_for_slot, REQUIRED_COUNTS
 from import_team import import_team, TeamNotFoundError, NoCurrentGameweekError
 
 
@@ -94,8 +94,36 @@ def recommendations_endpoint():
     session.close()
     return jsonify(result)
 
-    
-# imports a players team from offical FPL 
+
+@app.route("/recommend-slot", methods=["POST"])
+def recommend_slot_endpoint():
+    data = request.get_json()
+    position = data.get("position")
+
+
+    other_player_ids = data.get("player_ids", [])
+
+    if position not in REQUIRED_COUNTS:
+        return jsonify({"error": "position must be one of GKP, DEF, MID, FWD"}), 400
+
+    session = Session()
+
+    result = recommend_for_slot(position, other_player_ids, session)
+
+    response = {
+        "suggestions": [
+            {**create_player(suggestion["player"]), "score": suggestion["score"]}
+            for suggestion in result["suggestions"]
+        ],
+        "budget_remaining": result["budget_remaining"],
+        "max_price_for_slot": result["max_price_for_slot"],
+    }
+
+    session.close()
+    return jsonify(response)
+
+
+# imports a players team from offical FPL
 # <int:team ID> just used as a place holder for whatever the user's team ID is 
 
 @app.route("/import-team/<int:team_id>", methods=["GET"])
