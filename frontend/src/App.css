@@ -102,3 +102,13 @@
 .recommendation-row h3 {
   margin: 0 0 4px;
 }
+
+.budget-tracker {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.budget-tracker.over-budget {
+  color: #d33;
+}

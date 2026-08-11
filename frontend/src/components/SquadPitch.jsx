@@ -27,6 +27,13 @@ function SquadPitch() {
       .then((data) => setPlayers(data))
   }, [])
 
+  const amountSpent = Object.values(squad)
+    .filter(Boolean)
+    // .reduce takes the array down to one value ==> total money spent
+    .reduce((total, player) => total + player.now_cost, 0) // inital value is 0 
+
+  const budgetRemaining = 100 - amountSpent
+
   // the players eligible for whichever slot is currently open, ordered by price descending
   const playersForOpenSlot = openSlot
     ? players // if open slot is true...
@@ -72,6 +79,10 @@ function SquadPitch() {
 
   return (
     <div className="squad-pitch">
+      <p className={budgetRemaining < 0 ? 'budget-tracker over-budget' : 'budget-tracker'}>
+        Budget remaining: £{budgetRemaining.toFixed(1)}m / £100.0m
+      </p>
+
       {Object.entries(FORMATION).map(([position, count]) => (
 
         // for each position create x shirt icons
