@@ -1,13 +1,8 @@
 import { useState, useEffect } from 'react'
-import ShirtSlot from './ShirtSlot'
-
-// how many slots to render for each position
-const FORMATION = {
-  GKP: 2,
-  DEF: 5,
-  MID: 5,
-  FWD: 3,
-}
+import PitchGrid from './PitchGrid'
+import PlayerSelector from './PlayerSelector'
+import SlotRecommendation from './SlotRecommendation'
+import RecommendationsResult from './RecommendationsResult'
 
 function SquadPitch() {
 
@@ -30,17 +25,17 @@ function SquadPitch() {
   const amountSpent = Object.values(squad)
     .filter(Boolean)
     // .reduce takes the array down to one value ==> total money spent
-    .reduce((total, player) => total + player.now_cost, 0) // inital value is 0 
+    .reduce((total, player) => total + player.now_cost, 0) // inital value is 0
 
   const budgetRemaining = 100 - amountSpent
 
-  // the players eligible for whichever slot is currently open, ordered by price descending
-  const playersForOpenSlot = openSlot
-    ? players // if open slot is true...
-        .filter((player) => player.position === openSlot.position)
-        .sort((a, b) => b.now_cost - a.now_cost)
-    : [] // value if openSlot is empty
-
+  // every filled slot EXCEPT the one currently open - passed to SlotRecommendation
+  // so the backend knows how much budget is genuinely free for this slot
+  const otherPlayerIdsForOpenSlot = openSlot
+    ? Object.entries(squad)
+        .filter(([slotId, player]) => player && slotId !== `${openSlot.position}-${openSlot.index}`)
+        .map(([, player]) => player.id)
+    : []
 
   // fills the currently open slot with the chosen player, then closes the player list
   function handleSelectPlayer(player) {
@@ -83,22 +78,10 @@ function SquadPitch() {
         Budget remaining: £{budgetRemaining.toFixed(1)}m / £100.0m
       </p>
 
-      {Object.entries(FORMATION).map(([position, count]) => (
-
-        // for each position create x shirt icons
-        <div className="position-row" key={position}>
-          {Array.from({ length: count }).map((_, index) => (
-
-            <ShirtSlot
-              key={`${position}-${index}`}
-              position={position}
-              player={squad[`${position}-${index}`]}
-              onClick={() => setOpenSlot({ position, index })}
-            />
-          ))}
-
-        </div>
-      ))}
+      <PitchGrid
+        squad={squad}
+        onSlotClick={(position, index) => setOpenSlot({ position, index })}
+      />
 
       <button type="button" onClick={handleScoreTeam}>
         Score My Team
@@ -124,58 +107,27 @@ function SquadPitch() {
         </div>
       )}
 
-      {recommendationsResult && (
-
-        <div className="recommendations-result">
-          {recommendationsResult.errors && (
-            <ul>
-              {recommendationsResult.errors.map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          )}
-
-          {recommendationsResult.error && <p>{recommendationsResult.error}</p>}
-
-          {!recommendationsResult.errors &&
-            !recommendationsResult.error &&
-
-            Object.entries(recommendationsResult).map(([position, info]) => (
-              <div className="recommendation-row" key={position}>
-                <h3>{position}</h3>
-                <p>
-                  Weakest: {info.current_player.first_name} {info.current_player.second_name} -{' '}
-                  {info.current_score}
-                </p>
-
-                {info.suggested_replacement ? (
-                  <p>
-                    Suggested upgrade: {info.suggested_replacement.first_name}{' '}
-                    {info.suggested_replacement.second_name} - {info.suggested_score} (£
-                    {info.suggested_replacement.now_cost}m)
-                  </p>
-                ) : (
-                  <p>No better replacement found in a similar price range.</p>
-                )}
-              </div>
-            ))}
-        </div>
-      )}
+      <RecommendationsResult result={recommendationsResult} />
 
       {openSlot && (
         <div className="picker-panel">
           <p>
             Picking a player for {openSlot.position} (slot {openSlot.index + 1})
           </p>
-          <ul className="player-list">
-            {playersForOpenSlot.map((player) => (
-              <li key={player.id}>
-                <button type="button" onClick={() => handleSelectPlayer(player)}>
-                  {player.first_name} {player.second_name} - £{player.now_cost}m
-                </button>
-              </li>
-            ))}
-          </ul>
+
+          <SlotRecommendation
+            key={`${openSlot.position}-${openSlot.index}`}
+            position={openSlot.position}
+            otherPlayerIds={otherPlayerIdsForOpenSlot}
+            onSelectPlayer={handleSelectPlayer}
+          />
+
+          <PlayerSelector
+            players={players}
+            position={openSlot.position}
+            onSelectPlayer={handleSelectPlayer}
+          />
+
           <button type="button" onClick={() => setOpenSlot(null)}>
             Close
           </button>
