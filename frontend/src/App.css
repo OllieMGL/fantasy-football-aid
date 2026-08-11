@@ -4,6 +4,42 @@
   align-items: center;
   gap: 24px;
   padding: 40px;
+  max-width: 900px; /* keeps the page content contained and centered instead of full-bleed */
+  margin: 0 auto;
+}
+
+.import-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.import-team input {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 140px;
+}
+
+.import-error {
+  color: #d33;
+}
+
+.pitch-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  width: 100%;
+}
+
+.pitch-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 340px; /* fixed so the shirts don't shift when the picker panel opens/closes */
+  flex-shrink: 0;
 }
 
 .position-row {
@@ -46,12 +82,19 @@
 }
 
 .picker-panel {
-  margin-top: 16px;
   padding: 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
   background: #f9f9f9;
   text-align: center;
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.picker-divider {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid #ccc;
 }
 
 .player-list {

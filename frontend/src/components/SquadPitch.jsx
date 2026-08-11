@@ -3,6 +3,23 @@ import PitchGrid from './PitchGrid'
 import PlayerSelector from './PlayerSelector'
 import SlotRecommendation from './SlotRecommendation'
 import RecommendationsResult from './RecommendationsResult'
+import ImportTeam from './ImportTeam'
+
+
+function buildSquadFromPlayerIds(playerIds, playersList) {
+  const positionCounts = { GKP: 0, DEF: 0, MID: 0, FWD: 0 }
+  const newSquad = {}
+
+  for (const id of playerIds) {
+    const player = playersList.find((candidate) => candidate.id === id)
+
+    const index = positionCounts[player.position]
+    newSquad[`${player.position}-${index}`] = player //a ssigns the full player object to that slot in newSquad
+    positionCounts[player.position] += 1
+  }
+
+  return newSquad
+}
 
 function SquadPitch() {
 
@@ -72,16 +89,53 @@ function SquadPitch() {
       .then((data) => setRecommendationsResult(data))
   }
 
+  function handleImportTeam(playerIds) {
+    setSquad(buildSquadFromPlayerIds(playerIds, players))
+  }
+
   return (
     <div className="squad-pitch">
+      <ImportTeam onImport={handleImportTeam} />
+
       <p className={budgetRemaining < 0 ? 'budget-tracker over-budget' : 'budget-tracker'}>
         Budget remaining: £{budgetRemaining.toFixed(1)}m / £100.0m
       </p>
 
-      <PitchGrid
-        squad={squad}
-        onSlotClick={(position, index) => setOpenSlot({ position, index })}
-      />
+      <div className="pitch-layout">
+        <div className="pitch-column">
+          <PitchGrid
+            squad={squad}
+            onSlotClick={(position, index) => setOpenSlot({ position, index })}
+          />
+        </div>
+
+        {openSlot && (
+          <div className="picker-panel">
+            <p>
+              Picking a player for {openSlot.position} (slot {openSlot.index + 1})
+            </p>
+
+            <SlotRecommendation
+              key={`${openSlot.position}-${openSlot.index}`}
+              position={openSlot.position}
+              otherPlayerIds={otherPlayerIdsForOpenSlot}
+              onSelectPlayer={handleSelectPlayer}
+            />
+
+            <hr className="picker-divider" />
+
+            <PlayerSelector
+              players={players}
+              position={openSlot.position}
+              onSelectPlayer={handleSelectPlayer}
+            />
+
+            <button type="button" onClick={() => setOpenSlot(null)}>
+              Close
+            </button>
+          </div>
+        )}
+      </div>
 
       <button type="button" onClick={handleScoreTeam}>
         Score My Team
@@ -108,31 +162,6 @@ function SquadPitch() {
       )}
 
       <RecommendationsResult result={recommendationsResult} />
-
-      {openSlot && (
-        <div className="picker-panel">
-          <p>
-            Picking a player for {openSlot.position} (slot {openSlot.index + 1})
-          </p>
-
-          <SlotRecommendation
-            key={`${openSlot.position}-${openSlot.index}`}
-            position={openSlot.position}
-            otherPlayerIds={otherPlayerIdsForOpenSlot}
-            onSelectPlayer={handleSelectPlayer}
-          />
-
-          <PlayerSelector
-            players={players}
-            position={openSlot.position}
-            onSelectPlayer={handleSelectPlayer}
-          />
-
-          <button type="button" onClick={() => setOpenSlot(null)}>
-            Close
-          </button>
-        </div>
-      )}
     </div>
   )
 }
