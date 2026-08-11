@@ -84,3 +84,21 @@
   margin-top: 16px;
   text-align: center;
 }
+
+.recommendations-result {
+  margin-top: 16px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.recommendation-row {
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.recommendation-row h3 {
+  margin: 0 0 4px;
+}

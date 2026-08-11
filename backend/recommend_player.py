@@ -39,8 +39,8 @@ def find_weakest_by_position(team_players, player_scores):
 
 def find_replacement(weak_player, session, all_scores, current_team_ids):
     
-    min_price = weak_player.now_cost - 1
-    max_price = weak_player.now_cost + 1
+    min_price = weak_player.now_cost - 0.5
+    max_price = weak_player.now_cost + 0.5
 
     candidates = (
         session.query(Player)

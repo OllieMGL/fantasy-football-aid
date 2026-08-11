@@ -16,10 +16,10 @@ function SquadPitch() {
 
   // holds every player fetched from the backend, once loaded
   const [players, setPlayers] = useState([])
-
   const [squad, setSquad] = useState({})
 
   const [scoreResult, setScoreResult] = useState(null)
+  const [recommendationsResult, setRecommendationsResult] = useState(null)
 
   useEffect(() => {
     fetch('http://127.0.0.1:5000/players')
@@ -44,18 +44,30 @@ function SquadPitch() {
     setOpenSlot(null)
   }
 
-  function handleScoreTeam() {
-    const playerIds = Object.values(squad)
+  function getPlayerIds() {
+    return Object.values(squad)
       .filter(Boolean) // filter for selected valid players (no empty ones)
       .map((player) => player.id)
+  }
 
+  function handleScoreTeam() {
     fetch('http://127.0.0.1:5000/score-team', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ player_ids: playerIds }),
+      body: JSON.stringify({ player_ids: getPlayerIds() }),
     })
       .then((response) => response.json())
       .then((data) => setScoreResult(data))
+  }
+
+  function handleGetRecommendations() {
+    fetch('http://127.0.0.1:5000/recommendations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player_ids: getPlayerIds() }),
+    })
+      .then((response) => response.json())
+      .then((data) => setRecommendationsResult(data))
   }
 
   return (
@@ -81,6 +93,10 @@ function SquadPitch() {
         Score My Team
       </button>
 
+      <button type="button" onClick={handleGetRecommendations}>
+        Get Recommendations
+      </button>
+
       {scoreResult && (
         <div className="score-result">
           {scoreResult.score !== undefined && <p>Team score: {scoreResult.score}/100</p>}
@@ -94,6 +110,44 @@ function SquadPitch() {
           )}
 
           {scoreResult.error && <p>{scoreResult.error}</p>}
+        </div>
+      )}
+
+      {recommendationsResult && (
+
+        <div className="recommendations-result">
+          {recommendationsResult.errors && (
+            <ul>
+              {recommendationsResult.errors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          )}
+
+          {recommendationsResult.error && <p>{recommendationsResult.error}</p>}
+
+          {!recommendationsResult.errors &&
+            !recommendationsResult.error &&
+
+            Object.entries(recommendationsResult).map(([position, info]) => (
+              <div className="recommendation-row" key={position}>
+                <h3>{position}</h3>
+                <p>
+                  Weakest: {info.current_player.first_name} {info.current_player.second_name} -{' '}
+                  {info.current_score}
+                </p>
+
+                {info.suggested_replacement ? (
+                  <p>
+                    Suggested upgrade: {info.suggested_replacement.first_name}{' '}
+                    {info.suggested_replacement.second_name} - {info.suggested_score} (£
+                    {info.suggested_replacement.now_cost}m)
+                  </p>
+                ) : (
+                  <p>No better replacement found in a similar price range.</p>
+                )}
+              </div>
+            ))}
         </div>
       )}
 
