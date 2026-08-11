@@ -34,6 +34,11 @@
   fill: #b8d8ff;
 }
 
+.shirt-slot.filled .shirt-icon {
+  fill: #6fcf6f;
+  stroke: #3a8f3a;
+}
+
 .shirt-label {
   font-size: 12px;
   font-weight: bold;
@@ -59,6 +64,23 @@
 }
 
 .player-list li {
-  padding: 4px 8px;
   border-bottom: 1px solid #e0e0e0;
+}
+
+.player-list button {
+  width: 100%;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.player-list button:hover {
+  background: #e8f2ff;
+}
+
+.score-result {
+  margin-top: 16px;
+  text-align: center;
 }

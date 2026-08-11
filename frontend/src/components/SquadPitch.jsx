@@ -17,9 +17,9 @@ function SquadPitch() {
   // holds every player fetched from the backend, once loaded
   const [players, setPlayers] = useState([])
 
-  // maps a slot id like "DEF-2" to the player object filling it - empty
-  // object means no slots have been filled yet
   const [squad, setSquad] = useState({})
+
+  const [scoreResult, setScoreResult] = useState(null)
 
   useEffect(() => {
     fetch('http://127.0.0.1:5000/players')
@@ -34,6 +34,30 @@ function SquadPitch() {
         .sort((a, b) => b.now_cost - a.now_cost)
     : [] // value if openSlot is empty
 
+
+  // fills the currently open slot with the chosen player, then closes the player list
+  function handleSelectPlayer(player) {
+    const slotId = `${openSlot.position}-${openSlot.index}`
+
+    setSquad({ ...squad, [slotId]: player })
+    console.log('selected player for', slotId, ':', player)
+    setOpenSlot(null)
+  }
+
+  function handleScoreTeam() {
+    const playerIds = Object.values(squad)
+      .filter(Boolean) // filter for selected valid players (no empty ones)
+      .map((player) => player.id)
+
+    fetch('http://127.0.0.1:5000/score-team', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player_ids: playerIds }),
+    })
+      .then((response) => response.json())
+      .then((data) => setScoreResult(data))
+  }
+
   return (
     <div className="squad-pitch">
       {Object.entries(FORMATION).map(([position, count]) => (
@@ -45,12 +69,33 @@ function SquadPitch() {
             <ShirtSlot
               key={`${position}-${index}`}
               position={position}
+              player={squad[`${position}-${index}`]}
               onClick={() => setOpenSlot({ position, index })}
             />
           ))}
 
         </div>
       ))}
+
+      <button type="button" onClick={handleScoreTeam}>
+        Score My Team
+      </button>
+
+      {scoreResult && (
+        <div className="score-result">
+          {scoreResult.score !== undefined && <p>Team score: {scoreResult.score}/100</p>}
+
+          {scoreResult.errors && (
+            <ul>
+              {scoreResult.errors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          )}
+
+          {scoreResult.error && <p>{scoreResult.error}</p>}
+        </div>
+      )}
 
       {openSlot && (
         <div className="picker-panel">
@@ -60,7 +105,9 @@ function SquadPitch() {
           <ul className="player-list">
             {playersForOpenSlot.map((player) => (
               <li key={player.id}>
-                {player.first_name} {player.second_name} - £{player.now_cost}m
+                <button type="button" onClick={() => handleSelectPlayer(player)}>
+                  {player.first_name} {player.second_name} - £{player.now_cost}m
+                </button>
               </li>
             ))}
           </ul>
