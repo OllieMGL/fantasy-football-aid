@@ -18,7 +18,7 @@ function ImportTeam({ onImport }) {
           return
         }
 
-        onImport(data.player_ids)
+        onImport(data.player_ids, data.bank)
       })
   }
 

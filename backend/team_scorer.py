@@ -54,9 +54,9 @@ def check_valid_team(players):
         if position_counts[position] != required:
             errors.append(f"Need {required} {position}, but found {position_counts[position]}.")
 
-    total_cost = sum(p.now_cost for p in players)
-    if total_cost > 100.0:
-        errors.append(f"Team costs £{total_cost:.1f}m, which is over the £100.0m budget.")
+
+    # dont check for team cost - teams can cost below and above 100m
+    # users budget is not fixed at 100m due to player price changes 
 
     team_counts = {}
     for player in players:

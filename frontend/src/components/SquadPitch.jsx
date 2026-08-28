@@ -33,6 +33,8 @@ function SquadPitch() {
   const [scoreResult, setScoreResult] = useState(null)
   const [recommendationsResult, setRecommendationsResult] = useState(null)
 
+  const [importedBank, setImportedBank] = useState(null) //imported team bank balance
+
   useEffect(() => {
     fetch('http://127.0.0.1:5000/players')
       .then((response) => response.json())
@@ -59,6 +61,7 @@ function SquadPitch() {
     const slotId = `${openSlot.position}-${openSlot.index}`
 
     setSquad({ ...squad, [slotId]: player })
+    setImportedBank(null) // no longer neeed the imported bank balance - redudant as user has made changes 
     console.log('selected player for', slotId, ':', player)
     setOpenSlot(null)
   }
@@ -89,17 +92,23 @@ function SquadPitch() {
       .then((data) => setRecommendationsResult(data))
   }
 
-  function handleImportTeam(playerIds) {
+  function handleImportTeam(playerIds, bank) {
     setSquad(buildSquadFromPlayerIds(playerIds, players))
+    setImportedBank(bank)
   }
 
   return (
     <div className="squad-pitch">
       <ImportTeam onImport={handleImportTeam} />
 
-      <p className={budgetRemaining < 0 ? 'budget-tracker over-budget' : 'budget-tracker'}>
-        Budget remaining: £{budgetRemaining.toFixed(1)}m / £100.0m
-      </p>
+      {/*fpl bank figure  */}
+      {importedBank !== null ? (
+        <p className="budget-tracker">Bank: £{importedBank.toFixed(1)}m</p> // to fixed rounds to 1.dp 
+      ) : (
+        <p className={budgetRemaining < 0 ? 'budget-tracker over-budget' : 'budget-tracker'}>
+          Budget remaining: £{budgetRemaining.toFixed(1)}m / £100.0m
+        </p>
+      )}
 
       <div className="pitch-layout">
         <div className="pitch-column">

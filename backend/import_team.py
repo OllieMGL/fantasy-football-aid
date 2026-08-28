@@ -27,29 +27,13 @@ def import_team(team_id):
 
     player_ids = [pick["element"] for pick in picks_data["picks"]]
 
+    bank = picks_data["entry_history"]["bank"] / 10
+
     return {
         "player_ids": player_ids,
         "manager_name": f"{entry_data['player_first_name']} {entry_data['player_last_name']}",
         "team_name": entry_data["name"],
         "gameweek": current_event,
+        "bank": bank,
     }
 
-
-def main():
-    team_id = 390038
-
-    try:
-        result = import_team(team_id)
-    except TeamNotFoundError:
-        print(f"Could not find FPL team with id {team_id}")
-        return
-    except NoCurrentGameweekError:
-        print(f"Team {team_id} has no current gameweek picks yet.")
-        return
-
-    print(f"{result['team_name']} ({result['manager_name']}) - GW{result['gameweek']}")
-    print(result["player_ids"])
-
-
-if __name__ == "__main__":
-    main()
