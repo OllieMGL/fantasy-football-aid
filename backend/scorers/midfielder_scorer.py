@@ -2,25 +2,25 @@ from models import Player
 from scorers.common import normalise, get_team_difficulties, normalised_fixture_difficulty_for
 
 # midfielder
-# - total_points ~ reward 17%
+# - value (points / cost) ~ reward 21%
 # - goals_scored ~ reward 16%
 # - form ~ reward 12%
 # - fixture_difficulty ~ punish 8%
-# - value (points / cost) ~ reward 11%
 # - assists ~ reward 11%
 # - expected_goals + expected_assists (combined) ~ reward 10%
+# - total_points ~ reward 7%
 # - clean_sheets ~ reward 6%
 # - cards ~ punish 5%
 # - creativity ~ reward 4%
 
 MIDFIELDER_WEIGHTS = {
-    "total_points": 0.17,
+    "value": 0.21,
     "goals_scored": 0.16,
     "form": 0.12,
     "fixture_difficulty": 0.08,  # punish
-    "value": 0.11,
     "assists": 0.11,
     "expected_returns": 0.10,
+    "total_points": 0.07,
     "clean_sheets": 0.06,
     "cards": 0.05,                # punish
     "creativity": 0.04,

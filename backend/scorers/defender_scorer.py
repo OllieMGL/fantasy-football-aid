@@ -3,24 +3,24 @@ from scorers.common import normalise, get_team_difficulties, normalised_fixture_
 
 # defender
 # - clean_sheets ~ reward 22%
-# - total_points ~ reward 17%
+# - value (points / cost) ~ reward 17%
 # - form ~ reward 14%
 # - expected_goals_conceded ~ punish 12%
 # - goals_scored + assists (combined) ~ reward 12%
 # - fixture_difficulty ~ punish 8%
-# - value (points / cost) ~ reward 7%
+# - total_points ~ reward 7%
 # - cards ~ punish 5%
 # - goals_conceded ~ punish 2%
 # - own_goals ~ punish 1%
 
 DEFENDER_WEIGHTS = {
     "clean_sheets": 0.22,
-    "total_points": 0.17,
+    "value": 0.17,
     "form": 0.14,
     "expected_goals_conceded": 0.12,  # punish
     "attacking_returns": 0.12,
     "fixture_difficulty": 0.08,        # punish
-    "value": 0.07,
+    "total_points": 0.07,
     "cards": 0.05,                       # punish
     "goals_conceded": 0.02,               # punish
     "own_goals": 0.01,                     # punish

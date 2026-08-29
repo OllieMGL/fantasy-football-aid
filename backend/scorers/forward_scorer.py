@@ -3,24 +3,25 @@ from scorers.common import normalise, get_team_difficulties, normalised_fixture_
 
 # forward
 # - goals_scored ~ reward 22%
-# - total_points ~ reward 16%
+# - value (points / cost) ~ reward 20%
 # - form ~ reward 12%
 # - expected_goals ~ reward 11%
 # - fixture_difficulty ~ punish 8%
 # - assists ~ reward 10%
-# - value (points / cost) ~ reward 10%
+# - total_points ~ reward 6%
 # - threat ~ reward 6%
 # - penalties_missed ~ punish 3%
 # - cards ~ punish 2%
 
+
 FORWARD_WEIGHTS = {
     "goals_scored": 0.22,
-    "total_points": 0.16,
+    "value": 0.20,
     "form": 0.12,
     "expected_goals": 0.11,
     "fixture_difficulty": 0.08,  # punish
     "assists": 0.10,
-    "value": 0.10,
+    "total_points": 0.06,
     "threat": 0.06,
     "penalties_missed": 0.03,    # punish
     "cards": 0.02,                # punish

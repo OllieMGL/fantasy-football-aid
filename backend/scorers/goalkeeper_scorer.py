@@ -3,23 +3,24 @@ from scorers.common import normalise, get_team_difficulties, normalised_fixture_
 
 # goalkeeper
 # - clean_sheets ~ reward 24%
-# - total_points ~ reward 18%
+# - value (points / cost) ~ reward 22%
 # - form ~ reward 16%
-# - value (points / cost) ~ reward 12%
 # - saves ~ reward 9%
 # - goals_conceded ~ punish 9%
 # - fixture_difficulty ~ punish 8%
+# - total_points ~ reward 8%
 # - penalties_saved ~ reward 2%
 # - cards ~ punish 2%
 
+
 GOALKEEPER_WEIGHTS = {
     "clean_sheets": 0.24,
-    "total_points": 0.18,
+    "value": 0.22,
     "form": 0.16,
-    "value": 0.12,
     "saves": 0.09,
     "goals_conceded": 0.09,       # punish
     "fixture_difficulty": 0.08,    # punish
+    "total_points": 0.08,
     "penalties_saved": 0.02,
     "cards": 0.02,                  # punish
 }
