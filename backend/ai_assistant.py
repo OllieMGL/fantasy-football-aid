@@ -82,7 +82,7 @@ def ask(user_message, player_ids):
 def main():
     player_ids = [496, 418, 4, 142, 423, 154, 557, 397, 427, 165, 411, 497, 539, 212, 272]
 
-    reply = ask("Where are the weak spots in my team?", player_ids)
+    reply = ask("Why is Cole Palmer's score so low?", player_ids)
     print(reply)
 
 

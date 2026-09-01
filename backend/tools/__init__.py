@@ -7,15 +7,18 @@
 from tools.team_score import TOOL_SCHEMA as team_score_schema, call_get_team_score
 from tools.slot_recommendation import TOOL_SCHEMA as slot_recommendation_schema, call_recommend_for_slot
 from tools.team_recommendations import TOOL_SCHEMA as team_recommendations_schema, call_get_recommendations
+from tools.score_explanation import TOOL_SCHEMA as score_explanation_schema, call_explain_player_score
 
 TOOLS = [
     team_score_schema,
     slot_recommendation_schema,
     team_recommendations_schema,
+    score_explanation_schema,
 ]
 
 TOOL_FUNCTIONS = {
     "get_team_score": call_get_team_score,
     "recommend_for_slot": call_recommend_for_slot,
     "get_recommendations": call_get_recommendations,
+    "explain_player_score": call_explain_player_score,
 }
