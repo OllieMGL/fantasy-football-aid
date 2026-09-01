@@ -5,11 +5,14 @@
 # means writing one new file below and adding two lines here.
 
 from tools.team_score import TOOL_SCHEMA as team_score_schema, call_get_team_score
+from tools.slot_recommendation import TOOL_SCHEMA as slot_recommendation_schema, call_recommend_for_slot
 
 TOOLS = [
     team_score_schema,
+    slot_recommendation_schema,
 ]
 
 TOOL_FUNCTIONS = {
     "get_team_score": call_get_team_score,
+    "recommend_for_slot": call_recommend_for_slot,
 }

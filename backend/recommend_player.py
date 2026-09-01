@@ -13,6 +13,9 @@ BUDGET_LIMIT = 100.0
 MAX_PER_CLUB = 3
 SLOT_SUGGESTION_COUNT = 4
 
+# adds a buffer as player prices are variable
+PRICE_DRIFT_BUFFER = 0.5
+
 def get_all_scores(session):
 
     goalkeeper_scores = score_all_goalkeepers(session)
@@ -124,7 +127,12 @@ def recommend_for_slot(position, other_player_ids, session):
         club_counts[player.team_id] = club_counts.get(player.team_id, 0) + 1 # checks 3 per club, defaults to 0 if club not in dict 
         amount_spent += player.now_cost 
 
-    budget_remaining = BUDGET_LIMIT - amount_spent
+    # never let a fixed £100.0m ceiling go negative just because the rest of the
+    # squad's live prices have drifted above it since it was bought - treat
+    # whatever's already committed as the real floor, same reasoning as the
+    # budget check removed from check_valid_team
+    effective_budget = max(BUDGET_LIMIT, amount_spent) + PRICE_DRIFT_BUFFER
+    budget_remaining = effective_budget - amount_spent
 
 
     min_cost_by_position = get_min_available_cost_by_position(other_player_ids, session)
