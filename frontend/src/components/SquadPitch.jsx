@@ -4,6 +4,7 @@ import PlayerSelector from './PlayerSelector'
 import SlotRecommendation from './SlotRecommendation'
 import RecommendationsResult from './RecommendationsResult'
 import ImportTeam from './ImportTeam'
+import AskAI from './AskAI'
 
 
 function buildSquadFromPlayerIds(playerIds, playersList) {
@@ -171,6 +172,8 @@ function SquadPitch() {
       )}
 
       <RecommendationsResult result={recommendationsResult} />
+
+      <AskAI playerIds={getPlayerIds()} />
     </div>
   )
 }
