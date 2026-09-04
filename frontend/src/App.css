@@ -1,11 +1,16 @@
+@import "tailwindcss";
+
+body {
+  @apply bg-slate-50;
+}
+
 .squad-pitch {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  padding: 40px;
-  max-width: 900px; /* keeps the page content contained and centered instead of full-bleed */
-  margin: 0 auto;
+
+  @apply flex flex-col gap-6 pt-10 pb-10 pl-20 pr-96 w-full;
+}
+
+.page-header {
+  @apply flex justify-between items-center;
 }
 
 .import-team {
@@ -26,11 +31,7 @@
 }
 
 .pitch-layout {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 32px;
-  width: 100%;
+  @apply flex items-start justify-between gap-8 w-full;
 }
 
 .pitch-column {
@@ -38,8 +39,22 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  width: 340px; /* fixed so the shirts don't shift when the picker panel opens/closes */
+  width: 540px; /* fixed so the shirts don't shift when the picker panel opens/closes - wide enough for 5 bigger shirts in a row */
   flex-shrink: 0;
+}
+
+/* right of the shirts: action buttons on top, player-selection panel below when a slot is open */
+.side-column {
+  @apply flex flex-col gap-4 w-80 flex-shrink-0;
+}
+
+/* smaller, side by side, sitting right under the shirts */
+.action-buttons-row {
+  @apply flex gap-2 mt-4;
+}
+
+.primary-button-sm {
+  @apply px-3 py-1.5 rounded-md bg-emerald-700 text-white text-sm cursor-pointer transition-colors hover:bg-emerald-600;
 }
 
 .position-row {
@@ -59,15 +74,15 @@
 }
 
 .shirt-icon {
-  width: 72px;
-  height: 72px;
+  width: 92px;
+  height: 92px;
   fill: #d0d0d0;
   stroke: #888;
   stroke-width: 2;
 }
 
 .shirt-slot:hover .shirt-icon {
-  fill: #b8d8ff;
+  fill: #cdeed7; /* light tint of the same green used for filled shirts, not a separate accent colour */
 }
 
 .shirt-slot.filled .shirt-icon {
@@ -120,7 +135,7 @@
 }
 
 .player-list button:hover {
-  background: #e8f2ff;
+  background: #e6f7ea; /* same green family as everything else */
 }
 
 .score-result {
@@ -149,9 +164,46 @@
 .budget-tracker {
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: #047857; /* emerald-700 - matches the accent used everywhere else */
 }
 
 .budget-tracker.over-budget {
   color: #d33;
+}
+
+/* AI chat panel - a fixed vertical rectangle pinned to the far right of the
+   screen, like a typical website help-bot widget. "fixed" takes it out of
+   normal page flow entirely, positioned relative to the viewport rather than
+   the centered content column - that's why squad-pitch needed pr-96, so its
+   own content never ends up underneath this. */
+.ask-ai {
+  @apply fixed right-0 top-0 h-screen w-80 flex flex-col gap-3 border-l border-gray-300 bg-white p-4 shadow-lg;
+}
+
+.ask-ai-title {
+  @apply font-semibold text-gray-800;
+}
+
+.ask-ai-messages {
+  @apply flex-1 overflow-y-auto text-sm;
+}
+
+.ask-ai-placeholder {
+  @apply text-gray-400 italic;
+}
+
+.ask-ai-reply {
+  @apply text-gray-700;
+}
+
+.ask-ai-input-row {
+  @apply flex items-center gap-2 rounded-2xl border border-gray-300 px-3 py-2;
+}
+
+.ask-ai-input-row input {
+  @apply flex-1 border-none outline-none bg-transparent text-sm;
+}
+
+.ask-ai-input-row button {
+  @apply px-3 py-1.5 rounded-full bg-emerald-700 text-white text-sm cursor-pointer transition-colors hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed;
 }
