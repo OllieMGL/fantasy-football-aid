@@ -78,15 +78,3 @@ def ask(user_message, player_ids):
     session.close()
     return message.content
 
-
-def main():
-    player_ids = [496, 418, 4, 142, 423, 154, 557, 397, 427, 165, 411, 497, 539, 212, 272]
-
-    reply = ask("Why is Cole Palmer's score so low?", player_ids)
-    print(reply)
-
-
-if __name__ == "__main__":
-    main()
-
-

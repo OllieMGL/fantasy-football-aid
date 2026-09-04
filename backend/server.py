@@ -7,6 +7,7 @@ from models import Player
 from team_scorer import get_players_by_ids, score_team, check_valid_team
 from recommend_player import get_recommendations, recommend_for_slot, REQUIRED_COUNTS
 from import_team import import_team, TeamNotFoundError, NoCurrentGameweekError
+from ai_assistant import ask
 
 
 app = Flask(__name__)
@@ -137,6 +138,26 @@ def import_team_endpoint(team_id):
         return jsonify({"error": "This team has no gameweek picks yet (season may not have started)."}), 409
 
     return jsonify(result)
+
+
+@app.route("/ask", methods=["POST"])
+def ask_endpoint():
+    data = request.get_json()
+    message = data.get("message")
+    player_ids = data.get("player_ids")
+
+    if not message:
+        return jsonify({"error": "message is required"}), 400
+
+    if not player_ids:
+        return jsonify({"error": "player_ids is required"}), 400
+    
+    try:
+        reply = ask(message, player_ids)
+    except Exception:
+        return jsonify({"error": "The AI assistant is unavailable right now. Please try again."}), 502
+
+    return jsonify({"reply": reply})
 
 
 if __name__ == "__main__":
