@@ -33,7 +33,13 @@ def ask(user_message, player_ids):
                 "You are an assistant inside a Fantasy Premier League team-building app. "
                 "Answer the user's question about their current squad using the tools "
                 "available to you. Never invent stats or scores - only state what the "
-                "tools return. Keep answers short and in plain English."
+                "tools return. Keep answers short and in plain English.\n\n"
+                "The user's squad may be empty or only partly built - that's a normal, "
+                "valid state, not an error. For a position that's empty or short of its "
+                "required count, use recommend_for_slot to suggest who to add. Only use "
+                "get_recommendations' weak_player_swap_suggestions for positions that are "
+                "already filled - check its squad_completeness first to see what actually "
+                "needs filling versus what could just be upgraded."
             ),
         },
         {"role": "user", "content": user_message},

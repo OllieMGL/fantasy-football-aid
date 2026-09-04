@@ -144,14 +144,11 @@ def import_team_endpoint(team_id):
 def ask_endpoint():
     data = request.get_json()
     message = data.get("message")
-    player_ids = data.get("player_ids")
+    player_ids = data.get("player_ids", [])
 
     if not message:
         return jsonify({"error": "message is required"}), 400
 
-    if not player_ids:
-        return jsonify({"error": "player_ids is required"}), 400
-    
     try:
         reply = ask(message, player_ids)
     except Exception:
