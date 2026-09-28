@@ -34,6 +34,10 @@ function SquadPitch() {
   const [scoreResult, setScoreResult] = useState(null)
   const [recommendationsResult, setRecommendationsResult] = useState(null)
 
+  // recommendations score the whole league, so it takes a moment - without this
+  // the button looks like it did nothing
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false)
+
   const [importedBank, setImportedBank] = useState(null) //imported team bank balance
 
   useEffect(() => {
@@ -84,13 +88,18 @@ function SquadPitch() {
   }
 
   function handleGetRecommendations() {
+    setRecommendationsLoading(true)
+
     fetch('http://127.0.0.1:5000/recommendations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player_ids: getPlayerIds() }),
     })
       .then((response) => response.json())
-      .then((data) => setRecommendationsResult(data))
+      .then((data) => {
+        setRecommendationsResult(data)
+        setRecommendationsLoading(false)
+      })
   }
 
   function handleImportTeam(playerIds, bank) {
@@ -123,8 +132,13 @@ function SquadPitch() {
               Score My Team
             </button>
 
-            <button type="button" onClick={handleGetRecommendations} className="primary-button-sm">
-              Get Recommendations
+            <button
+              type="button"
+              onClick={handleGetRecommendations}
+              disabled={recommendationsLoading}
+              className="primary-button-sm"
+            >
+              {recommendationsLoading ? 'Working...' : 'Get Recommendations'}
             </button>
           </div>
 

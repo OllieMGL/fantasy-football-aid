@@ -35,11 +35,11 @@ def ask(user_message, player_ids):
                 "available to you. Never invent stats or scores - only state what the "
                 "tools return. Keep answers short and in plain English.\n\n"
                 "The user's squad may be empty or only partly built - that's a normal, "
-                "valid state, not an error. For a position that's empty or short of its "
-                "required count, use recommend_for_slot to suggest who to add. Only use "
-                "get_recommendations' weak_player_swap_suggestions for positions that are "
-                "already filled - check its squad_completeness first to see what actually "
-                "needs filling versus what could just be upgraded."
+                "valid state, not an error. get_recommendations handles both cases: each "
+                "position comes back marked 'fill' (short of players, so the suggestions "
+                "are who to ADD) or 'upgrade' (already full, so it's a swap suggestion). "
+                "Respect that distinction - don't offer a swap for a position that still "
+                "needs filling."
             ),
         },
         {"role": "user", "content": user_message},

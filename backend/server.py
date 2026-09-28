@@ -64,33 +64,34 @@ def score_team_endpoint():
     return jsonify({"score": score})
 
 
+# Not gated on check_valid_team - an empty or half-built squad is exactly when
+# recommendations are most useful, not an error. get_recommendations decides per
+# position whether to suggest players to add ("fill") or an upgrade ("upgrade").
+
 @app.route("/recommendations", methods=["POST"])
 def recommendations_endpoint():
     data = request.get_json()
-    player_ids = data.get("player_ids")
-
-    if not player_ids:
-        return jsonify({"error": "player_ids is required"}), 400
+    player_ids = data.get("player_ids", [])
 
     session = Session()
-
-    team_players = get_players_by_ids(player_ids, session)
-    errors = check_valid_team(team_players)
-    if errors:
-        session.close()
-        return jsonify({"errors": errors}), 400
-
     recommendations = get_recommendations(player_ids, session)
 
-    result = {
-        position: {
-            "current_player": create_player(info["current_player"]),
-            "current_score": info["current_score"],
-            "suggested_replacement": create_player(info["suggested_replacement"]),
-            "suggested_score": info["suggested_score"],
-        }
-        for position, info in recommendations.items()
-    }
+    # swap the Player objects for plain dicts - the rest of each entry is
+    # already plain data and passes straight through
+    result = {}
+    for position, info in recommendations.items():
+        entry = {**info}
+
+        if info["action"] == "fill":
+            entry["suggestions"] = [
+                {**create_player(suggestion["player"]), "score": suggestion["score"]}
+                for suggestion in info["suggestions"]
+            ]
+        else:
+            entry["current_player"] = create_player(info["current_player"])
+            entry["suggested_replacement"] = create_player(info["suggested_replacement"])
+
+        result[position] = entry
 
     session.close()
     return jsonify(result)

@@ -161,6 +161,24 @@ body {
   margin: 0 0 4px;
 }
 
+/* "2 of 5 picked - 3 to add" sub-line on a position that needs filling */
+.recommendation-meta {
+  @apply text-xs text-gray-500 mb-1;
+}
+
+.recommendation-suggestions {
+  @apply list-none p-0 m-0 text-sm;
+}
+
+.recommendation-suggestions li {
+  @apply py-1 border-b border-gray-200 last:border-b-0;
+}
+
+/* "nothing affordable" / "no better replacement" messages */
+.recommendation-empty {
+  @apply text-sm text-gray-500 italic;
+}
+
 .budget-tracker {
   font-size: 18px;
   font-weight: bold;
