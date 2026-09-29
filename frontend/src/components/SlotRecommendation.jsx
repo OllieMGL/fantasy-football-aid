@@ -11,6 +11,7 @@ function SlotRecommendation({ position, otherPlayerIds, onSelectPlayer }) {
     })
       .then((response) => response.json())
       .then((data) => setResult(data))
+      .catch(() => setResult({ error: "Can't reach the server" }))
   }
 
   return (

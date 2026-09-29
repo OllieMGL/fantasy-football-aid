@@ -18,8 +18,6 @@ function InfoButton() {
       {open && (
         <div className="info-overlay" onClick={() => setOpen(false)}>
 
-          {/* stopPropagation so a click INSIDE the panel doesn't bubble up to
-              the backdrop above and immediately close it */}
           <div className="info-panel" onClick={(event) => event.stopPropagation()}>
             <h2>How this page works</h2>
 
@@ -54,7 +52,7 @@ function InfoButton() {
             <h3>Squad rules</h3>
             <p>
               2 goalkeepers, 5 defenders, 5 midfielders and 3 forwards, within £100m, and no
-              more than 3 players from any one club. 
+              more than 3 players from any one club.
             </p>
 
             <h3>The assistant</h3>

@@ -20,6 +20,7 @@ function ImportTeam({ onImport }) {
 
         onImport(data.player_ids, data.bank)
       })
+      .catch(() => setError("Can't reach the server"))
   }
 
   return (

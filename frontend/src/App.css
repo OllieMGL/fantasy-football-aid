@@ -260,3 +260,8 @@ body {
 .info-panel > button {
   @apply mt-5 px-3 py-1.5 rounded-md border border-gray-300 bg-white cursor-pointer transition-colors hover:bg-gray-50;
 }
+
+/* shown when the backend can't be reached at all */
+.server-error {
+  @apply rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800;
+}

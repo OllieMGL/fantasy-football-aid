@@ -20,6 +20,10 @@ function AskAI({ playerIds }) {
         setReply(data.reply || data.error)
         setLoading(false)
       })
+      .catch(() => {
+        setReply("Can't reach the server. Is the backend running?")
+        setLoading(false) // otherwise it stays stuck on "Thinking..."
+      })
   }
 
   return (

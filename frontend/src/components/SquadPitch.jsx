@@ -41,10 +41,15 @@ function SquadPitch() {
 
   const [importedBank, setImportedBank] = useState(null) //imported team bank balance
 
+  const [serverError, setServerError] = useState(null)
+
   useEffect(() => {
     fetch('http://127.0.0.1:5000/players')
       .then((response) => response.json())
       .then((data) => setPlayers(data))
+      // fetch only rejects on a network failure, so this is the "backend isn't
+      // running" case rather than an error response from it
+      .catch(() => setServerError("Can't reach the server"))
   }, [])
 
   const amountSpent = Object.values(squad)
@@ -86,6 +91,7 @@ function SquadPitch() {
     })
       .then((response) => response.json())
       .then((data) => setScoreResult(data))
+      .catch(() => setScoreResult({ error: "Can't reach the server" }))
   }
 
   function handleGetRecommendations() {
@@ -100,6 +106,10 @@ function SquadPitch() {
       .then((data) => {
         setRecommendationsResult(data)
         setRecommendationsLoading(false)
+      })
+      .catch(() => {
+        setRecommendationsResult({ error: "Can't reach the server" })
+        setRecommendationsLoading(false) 
       })
   }
 
@@ -122,6 +132,8 @@ function SquadPitch() {
 
         <InfoButton />
       </div>
+
+      {serverError && <p className="server-error">{serverError}</p>}
 
       <div className="pitch-layout">
         <div className="pitch-column">
