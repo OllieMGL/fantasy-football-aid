@@ -162,7 +162,10 @@ function SquadPitch() {
             </div>
           )}
 
-          <RecommendationsResult result={recommendationsResult} />
+          <RecommendationsResult
+            result={recommendationsResult}
+            onClose={() => setRecommendationsResult(null)}
+          />
 
           {openSlot && (
             <div className="picker-panel">

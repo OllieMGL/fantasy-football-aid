@@ -15,7 +15,7 @@ function SlotRecommendation({ position, otherPlayerIds, onSelectPlayer }) {
 
   return (
     <div className="slot-recommendation">
-      <button type="button" onClick={handleRecommend}>
+      <button type="button" onClick={handleRecommend} className="secondary-button">
         Recommend a player for this slot
       </button>
 

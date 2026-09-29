@@ -1,7 +1,7 @@
 // displays the outcome of a whole-team "Get Recommendations" request. Each
 // position comes back marked either "fill" (short of players - here's who to
 // add) or "upgrade" (already full - here's a better player for the weakest one)
-function RecommendationsResult({ result }) {
+function RecommendationsResult({ result, onClose }) {
   if (!result) return null // nothing to show until recommendations have been requested
 
   // early return, so the loop below never tries to read an error string as if
@@ -10,6 +10,10 @@ function RecommendationsResult({ result }) {
     return (
       <div className="recommendations-result">
         <p>{result.error}</p>
+
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
       </div>
     )
   }
@@ -63,6 +67,10 @@ function RecommendationsResult({ result }) {
           )}
         </div>
       ))}
+
+      <button type="button" onClick={onClose}>
+        Close
+      </button>
     </div>
   )
 }
