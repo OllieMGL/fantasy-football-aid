@@ -5,6 +5,7 @@ import SlotRecommendation from './SlotRecommendation'
 import RecommendationsResult from './RecommendationsResult'
 import ImportTeam from './ImportTeam'
 import AskAI from './AskAI'
+import InfoButton from './InfoButton'
 
 
 function buildSquadFromPlayerIds(playerIds, playersList) {
@@ -118,6 +119,8 @@ function SquadPitch() {
             Budget remaining: £{budgetRemaining.toFixed(1)}m / £100.0m
           </p>
         )}
+
+        <InfoButton />
       </div>
 
       <div className="pitch-layout">
