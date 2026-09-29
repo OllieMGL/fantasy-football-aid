@@ -8,6 +8,7 @@ from team_scorer import get_players_by_ids, score_team, check_valid_team
 from recommend_player import get_recommendations, recommend_for_slot, REQUIRED_COUNTS
 from import_team import import_team, TeamNotFoundError, NoCurrentGameweekError
 from ai_assistant import ask
+from load_data import refresh_checker
 
 
 app = Flask(__name__)
@@ -159,4 +160,16 @@ def ask_endpoint():
 
 
 if __name__ == "__main__":
+    # keeps the local data current without having to remember to reload it.
+    # Only actually does the work if the data is older than MAX_DATA_AGE, so
+    # ordinary restarts stay instant - and debug mode restarts the server on
+    # every file save, so this would be painful otherwise.
+    # Wrapped because a failed refresh (FPL down, no internet) should never stop
+    # the app starting up on the data it already has.
+    try:
+        if refresh_checker():
+            print("FPL data was stale - refreshed.")
+    except Exception as error:
+        print(f"Could not refresh FPL data, using what's already stored: {error}")
+
     app.run(debug=True)

@@ -103,3 +103,10 @@ class ForwardStats(Base):
     yellow_cards = Column(Integer)
     red_cards = Column(Integer)
     assists = Column(Integer)
+
+# when the FPL data was last pulled in.
+class DataRefresh(Base):
+    __tablename__ = "data_refresh"
+
+    id = Column(Integer, primary_key=True)
+    refreshed_at = Column(DateTime)
