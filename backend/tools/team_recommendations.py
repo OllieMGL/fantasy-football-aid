@@ -1,9 +1,5 @@
 from recommend_player import get_recommendations
 
-# Empty parameters again, but for a different reason than get_team_score's:
-# this tool deliberately covers every position at once - "where are my weak
-# spots" is a whole-squad question, so there's no single argument for the
-# model to narrow it down to.
 
 TOOL_SCHEMA = {
     "type": "function",
@@ -26,11 +22,11 @@ TOOL_SCHEMA = {
 }
 
 
-def call_get_recommendations(player_ids, session):
+def call_get_recommendations(player_ids, session, budget):
     """The real work - runs the app's actual recommendation logic, then swaps the
     SQLAlchemy Player objects for plain names/prices the model can read."""
 
-    recommendations = get_recommendations(player_ids, session)
+    recommendations = get_recommendations(player_ids, session, budget=budget)
 
     result = {}
     for position, info in recommendations.items():

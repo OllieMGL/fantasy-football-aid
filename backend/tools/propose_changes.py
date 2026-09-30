@@ -1,17 +1,8 @@
 from recommend_player import count_by_club, REQUIRED_COUNTS, BUDGET_LIMIT, MAX_PER_CLUB
 from team_scorer import get_players_by_ids
 
-# The one tool that leads to the squad actually changing - but it still doesn't
-# change anything itself:
-#   1. the model PROPOSES changes (player ids in and out)
-#   2. this file CHECKS them against the game's rules
-#   3. the user DECIDES, by clicking "Apply" in the frontend
-#
-# The checks happen in two stages:
-#   - check_each_change: is each swap sensible on its own?
-#   - check_new_squad:   is the squad legal once EVERY change is made?
-# The second stage matters because two swaps can each fit the budget on their
-# own and still go over it together.
+
+# ai proposes a change, this tool checks them against game rules
 
 TOOL_SCHEMA = {
     "type": "function",
@@ -52,7 +43,7 @@ def player_name(player):
 
 
 def check_each_change(changes, player_ids, players_by_id):
-    # stage 1 - looks at each swap on its own, before thinking about the whole squad
+    # looks at each swap on its own
     errors = []
     brought_in_so_far = []
 
@@ -74,7 +65,7 @@ def check_each_change(changes, player_ids, players_by_id):
         brought_in_so_far.append(in_id)
 
         if out_id is None:
-            continue  # filling an empty slot - so nothing more to check
+            continue
 
         if out_id not in player_ids:
             errors.append(f"Player id {out_id} is not in the squad, so can't be taken out.")
@@ -92,8 +83,8 @@ def check_each_change(changes, player_ids, players_by_id):
 
 
 def build_new_squad(changes, player_ids):
-    # the squad's ids as they'd be after every change is made
-    new_ids = list(player_ids)  # a copy, so the original list isn't changed
+
+    new_ids = list(player_ids)
 
     for change in changes:
         if change["out_id"] in new_ids:
@@ -104,8 +95,8 @@ def build_new_squad(changes, player_ids):
     return new_ids
 
 
-def check_new_squad(new_players, current_players):
-    # stage 2 - the rules that only make sense for the squad as a whole
+def check_new_squad(new_players, budget):
+    # check squad rules
     errors = []
 
     # no position over its limit
@@ -122,11 +113,9 @@ def check_new_squad(new_players, current_players):
         if count > MAX_PER_CLUB:
             errors.append(f"That would give {count} players from one club (team_id {team_id}), max is {MAX_PER_CLUB}.")
 
-    current_cost = sum(player.now_cost for player in current_players)
-    new_cost = sum(player.now_cost for player in new_players)
-    budget = max(BUDGET_LIMIT, current_cost)
 
-    # rounded, because adding up prices like 5.1 + 4.3 gives tiny float errors
+    new_cost = sum(player.now_cost for player in new_players)
+
     if round(new_cost, 1) > round(budget, 1):
         errors.append(f"That would cost £{new_cost:.1f}m, which is over the £{budget:.1f}m budget.")
 
@@ -134,7 +123,7 @@ def check_new_squad(new_players, current_players):
 
 
 def describe_changes(changes, players_by_id):
-    # turns the ids into names and prices the frontend can show on the button
+    # turns the ids into names and prices for frontend
     described = []
 
     for change in changes:
@@ -155,12 +144,10 @@ def describe_changes(changes, players_by_id):
     return described
 
 
-def call_propose_changes(changes, player_ids, session):
+def call_propose_changes(changes, player_ids, session, budget=BUDGET_LIMIT):
     if not changes:
         return {"valid": False, "errors": ["No changes were given."]}
 
-    # fetch everyone involved (current squad + everyone coming in) in one query,
-    # then keep them in a dict so any player can be looked up by id
     ids_needed = list(player_ids)
     for change in changes:
         ids_needed.append(change["in_id"])
@@ -175,10 +162,9 @@ def call_propose_changes(changes, player_ids, session):
 
     new_ids = build_new_squad(changes, player_ids)
 
-    current_players = [players_by_id[pid] for pid in player_ids]
     new_players = [players_by_id[pid] for pid in new_ids]
 
-    errors = check_new_squad(new_players, current_players)
+    errors = check_new_squad(new_players, budget)
     if errors:
         return {"valid": False, "errors": errors}
 

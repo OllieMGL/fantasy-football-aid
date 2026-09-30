@@ -7,6 +7,9 @@ from team_scorer import get_players_by_ids
 from models import Player
 
 REQUIRED_COUNTS = {"GKP": 2, "DEF": 5, "MID": 5, "FWD": 3}
+
+# the budget for a squad built by hand. An imported squad's budget is its value
+# plus the bank instead - the frontend works that out and sends it in
 BUDGET_LIMIT = 100.0
 MAX_PER_CLUB = 3
 SLOT_SUGGESTION_COUNT = 4
@@ -14,8 +17,7 @@ SLOT_SUGGESTION_COUNT = 4
 # how many suggestions
 OVERVIEW_SUGGESTION_COUNT = 2
 
-# adds a buffer as player prices are variable
-PRICE_DRIFT_BUFFER = 0.5
+# an upgrade suggestion is a player within £0.5m of the one being replaced
 REPLACEMENT_PRICE_WINDOW = 0.5
 
 
@@ -74,10 +76,17 @@ def find_weakest_by_position(team_players, player_scores):
 
     return weakest
 
-def find_replacement(weak_player, session, all_scores, current_team_ids, club_counts):
+def find_replacement(weak_player, session, all_scores, current_team_ids, club_counts, money_left=None):
 
     min_price = weak_player.now_cost - REPLACEMENT_PRICE_WINDOW
     max_price = weak_player.now_cost + REPLACEMENT_PRICE_WINDOW
+
+    # selling the weak player gives their price back
+    if money_left is not None:
+        most_we_can_afford = weak_player.now_cost + money_left
+
+        if most_we_can_afford < max_price:
+            max_price = most_we_can_afford
 
     candidates = (
         session.query(Player)
@@ -127,21 +136,18 @@ def get_min_available_cost_by_position(excluded_ids, session):
     return dict(rows)  # e.g. {"GKP": 4.0, "DEF": 3.9, "MID": 4.3, "FWD": 4.0}
 
 # Returns (budget_remaining, max_price)
-def get_max_price_for_slot(position, other_players, other_player_ids, session):
+def get_max_price_for_slot(position, other_players, other_player_ids, session, budget=BUDGET_LIMIT):
 
     amount_spent = sum(player.now_cost for player in other_players)
 
-    # never let a fixed £100.0m ceiling go negative just because the rest of the
-    # squad's live prices have drifted above it since it was bought - treat
-    # whatever's already committed as the real floor
-    
-    effective_budget = max(BUDGET_LIMIT, amount_spent) + PRICE_DRIFT_BUFFER
-    budget_remaining = effective_budget - amount_spent
+    # can go negative if a hand-built squad is over £100m - then nothing is
+    # affordable, which is correct
+    budget_remaining = budget - amount_spent
 
     completeness = get_squad_completeness(other_players)
     min_cost_by_position = get_min_available_cost_by_position(other_player_ids, session)
 
-    # money that has to stay back for the squad's OTHER empty slots - you can't
+    # money that has to stay back for the squad's OTHER empty slots
     reserved_for_other_slots = 0.0
     for pos, counts in completeness.items():
         empty_slots = counts["missing"]
@@ -156,17 +162,15 @@ def get_max_price_for_slot(position, other_players, other_player_ids, session):
 
 
 
-def recommend_for_slot(position, other_player_ids, session, all_scores=None):
+def recommend_for_slot(position, other_player_ids, session, all_scores=None, budget=BUDGET_LIMIT):
 
     other_players = get_players_by_ids(other_player_ids, session)
     club_counts = count_by_club(other_players)
 
     budget_remaining, max_price_for_slot = get_max_price_for_slot(
-        position, other_players, other_player_ids, session
+        position, other_players, other_player_ids, session, budget=budget
     )
 
-    # same reasoning as get_recommendations - passed in when the caller has
-    # already scored the league, computed here when nobody has
     if all_scores is None:
         all_scores = get_all_scores(session)
 
@@ -204,7 +208,7 @@ def recommend_for_slot(position, other_player_ids, session, all_scores=None):
 
 
 # everything feeds into this function 
-def get_recommendations(selected_player_ids, session, all_scores=None):
+def get_recommendations(selected_player_ids, session, all_scores=None, budget=BUDGET_LIMIT):
 
     # One entry per position, always all four. "action" says which kind it is:
     #   "fill"    - short of players, so suggest who to ADD
@@ -221,6 +225,9 @@ def get_recommendations(selected_player_ids, session, all_scores=None):
     club_counts = count_by_club(team_players)
     weakest_by_position = find_weakest_by_position(team_players, all_scores)
 
+    squad_cost = sum(player.now_cost for player in team_players)
+    money_left = budget - squad_cost
+
     recommendations = {}
     # recommendations creates a nested dictionary
     # Key is position and the value is another dictionary containing the infomation below
@@ -228,7 +235,9 @@ def get_recommendations(selected_player_ids, session, all_scores=None):
     for position, counts in completeness.items():
 
         if counts["missing"] > 0:
-            slot = recommend_for_slot(position, selected_player_ids, session, all_scores=all_scores)
+            slot = recommend_for_slot(
+                position, selected_player_ids, session, all_scores=all_scores, budget=budget
+            )
 
             recommendations[position] = {
                 "action": "fill",
@@ -241,7 +250,8 @@ def get_recommendations(selected_player_ids, session, all_scores=None):
             # filled means at least one player, so weakest_by_position always has this one
             weak_player = weakest_by_position[position]
             replacement = find_replacement(
-                weak_player, session, all_scores, selected_player_ids, club_counts
+                weak_player, session, all_scores, selected_player_ids, club_counts,
+                money_left=money_left,
             )
 
             recommendations[position] = {

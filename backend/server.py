@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from db import engine
 from models import Player
 from team_scorer import get_players_by_ids, score_team, check_valid_team
-from recommend_player import get_recommendations, recommend_for_slot, REQUIRED_COUNTS
+from recommend_player import get_recommendations, recommend_for_slot, REQUIRED_COUNTS, BUDGET_LIMIT
 from import_team import import_team, TeamNotFoundError, NoCurrentGameweekError
 from ai_assistant import ask
 from load_data import refresh_checker
@@ -65,17 +65,17 @@ def score_team_endpoint():
     return jsonify({"score": score})
 
 
-# Not gated on check_valid_team - an empty or half-built squad is exactly when
-# recommendations are most useful, not an error. get_recommendations decides per
-# position whether to suggest players to add ("fill") or an upgrade ("upgrade").
-
 @app.route("/recommendations", methods=["POST"])
 def recommendations_endpoint():
     data = request.get_json()
     player_ids = data.get("player_ids", [])
 
+    # the frontend sends the budget - 100m, or squad value + bank for an imported
+    # team. If it's missing, fall back to 100m
+    budget = data.get("budget", BUDGET_LIMIT)
+
     session = Session()
-    recommendations = get_recommendations(player_ids, session)
+    recommendations = get_recommendations(player_ids, session, budget=budget)
 
     # swap the Player objects for plain dicts - the rest of each entry is
     # already plain data and passes straight through
@@ -105,13 +105,14 @@ def recommend_slot_endpoint():
 
 
     other_player_ids = data.get("player_ids", [])
+    budget = data.get("budget", BUDGET_LIMIT)
 
     if position not in REQUIRED_COUNTS:
         return jsonify({"error": "position must be one of GKP, DEF, MID, FWD"}), 400
 
     session = Session()
 
-    result = recommend_for_slot(position, other_player_ids, session)
+    result = recommend_for_slot(position, other_player_ids, session, budget=budget)
 
     response = {
         "suggestions": [
@@ -147,12 +148,13 @@ def ask_endpoint():
     data = request.get_json()
     message = data.get("message")
     player_ids = data.get("player_ids", [])
+    budget = data.get("budget", BUDGET_LIMIT)
 
     if not message:
         return jsonify({"error": "message is required"}), 400
 
     try:
-        reply, proposed_changes = ask(message, player_ids)
+        reply, proposed_changes = ask(message, player_ids, budget)
     except Exception:
         return jsonify({"error": "The AI assistant is unavailable right now. Please try again."}), 502
 
@@ -161,12 +163,7 @@ def ask_endpoint():
 
 
 if __name__ == "__main__":
-    # keeps the local data current without having to remember to reload it.
-    # Only actually does the work if the data is older than MAX_DATA_AGE, so
-    # ordinary restarts stay instant - and debug mode restarts the server on
-    # every file save, so this would be painful otherwise.
-    # Wrapped because a failed refresh (FPL down, no internet) should never stop
-    # the app starting up on the data it already has.
+
     try:
         if refresh_checker():
             print("FPL data was stale - refreshed.")

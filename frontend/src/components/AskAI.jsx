@@ -1,31 +1,28 @@
 import { useState } from 'react'
 
-function AskAI({ playerIds, onApplyChanges }) {
+function AskAI({ playerIds, budget, onApplyChanges }) {
 
   const [question, setQuestion] = useState('')
   const [reply, setReply] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  // transfers the AI suggested that already passed the backend's checks -
-  // null when the reply didn't suggest any, so no button is shown
   const [proposedChanges, setProposedChanges] = useState(null)
 
   function handleAsk() {
-    // the box is cleared straight away, so "asked" holds onto the text for the
-    // request - otherwise it'd be sending an empty message
+    // the box is cleared straight away, so "asked" holds onto the text
     const asked = question.trim()
 
-    if (!asked) return // nothing typed, so don't bother the server
+    if (!asked) return 
 
     setLoading(true)
     setReply(null)
-    setProposedChanges(null) // an old button shouldn't stay under a new question
+    setProposedChanges(null)
     setQuestion('')
 
     fetch('http://127.0.0.1:5000/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: asked, player_ids: playerIds }),
+      body: JSON.stringify({ message: asked, player_ids: playerIds, budget }),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -41,7 +38,7 @@ function AskAI({ playerIds, onApplyChanges }) {
 
   function handleApply() {
     onApplyChanges(proposedChanges)
-    setProposedChanges(null) // hides the button, so the same changes can't be applied twice
+    setProposedChanges(null)
   }
 
   return (
@@ -62,7 +59,6 @@ function AskAI({ playerIds, onApplyChanges }) {
             <ul>
               {proposedChanges.map((change) => (
                 <li key={change.in_id}>
-                  {/* out_name is null when the AI is filling an empty slot */}
                   {change.out_name ? `Out: ${change.out_name} → ` : ''}
                   In: {change.in_name} (£{change.in_price}m)
                 </li>

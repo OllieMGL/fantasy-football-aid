@@ -1,10 +1,6 @@
 from recommend_player import recommend_for_slot, get_all_scores, find_weakest_by_position, REQUIRED_COUNTS
 from team_scorer import get_players_by_ids
 
-# The description of the function that gets sent to the model - it's metadata,
-# not code. Unlike get_team_score, this one has a real argument: the model has
-# to read the user's question and decide which position they mean.
-
 TOOL_SCHEMA = {
     "type": "function",
     "function": {
@@ -28,13 +24,8 @@ TOOL_SCHEMA = {
 }
 
 
-def call_recommend_for_slot(position, player_ids, session):
+def call_recommend_for_slot(position, player_ids, session, budget):
 
-    # if that position is already full, "who should I bring in for X" really means
-    # "who should replace my weakest X" - so free up that one player's slot and
-    # cost first, same as clicking an already-filled slot in the picker would.
-    # if the position isn't full, there's a genuine empty slot already and no one
-    # needs excluding - recommend_for_slot handles that case fine on its own.
     team_players = get_players_by_ids(player_ids, session)
     position_count = sum(1 for p in team_players if p.position == position)
 
@@ -44,10 +35,7 @@ def call_recommend_for_slot(position, player_ids, session):
         if weakest:
             player_ids = [pid for pid in player_ids if pid != weakest.id]
 
-    # has to change the SQL Alchemy player objects into plain dicts
-    # as only plain data can be sent back to the model as JSON
-
-    result = recommend_for_slot(position, player_ids, session)
+    result = recommend_for_slot(position, player_ids, session, budget=budget)
 
     return {
         "suggestions": [

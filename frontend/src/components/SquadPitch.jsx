@@ -39,7 +39,10 @@ function SquadPitch() {
   // the button looks like it did nothing
   const [recommendationsLoading, setRecommendationsLoading] = useState(false)
 
-  const [importedBank, setImportedBank] = useState(null) //imported team bank balance
+  // 100m for a squad built by hand. Importing a team changes it to that squad's
+  // value + its bank - see handleImportTeam. Sent to the backend with every
+  // request that needs it, so the whole app uses the same number
+  const [budget, setBudget] = useState(100)
 
   const [serverError, setServerError] = useState(null)
 
@@ -57,7 +60,9 @@ function SquadPitch() {
     // .reduce takes the array down to one value ==> total money spent
     .reduce((total, player) => total + player.now_cost, 0) // inital value is 0
 
-  const budgetRemaining = 100 - amountSpent
+  // rounded to 1 d.p. - adding up prices like 5.1 + 4.3 gives tiny float errors,
+  // which could show as "-0.0" and turn the tracker red for no reason
+  const budgetRemaining = Math.round((budget - amountSpent) * 10) / 10
 
   // every filled slot EXCEPT the one currently open - passed to SlotRecommendation
   // so the backend knows how much budget is genuinely free for this slot
@@ -72,7 +77,6 @@ function SquadPitch() {
     const slotId = `${openSlot.position}-${openSlot.index}`
 
     setSquad({ ...squad, [slotId]: player })
-    setImportedBank(null) // no longer neeed the imported bank balance - redudant as user has made changes 
     console.log('selected player for', slotId, ':', player)
     setOpenSlot(null)
   }
@@ -100,7 +104,7 @@ function SquadPitch() {
     fetch('http://127.0.0.1:5000/recommendations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ player_ids: getPlayerIds() }),
+      body: JSON.stringify({ player_ids: getPlayerIds(), budget }),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -113,8 +117,7 @@ function SquadPitch() {
       })
   }
 
-  // applies the transfers the AI suggested. They were already checked by the
-  // backend (budget, positions, club limit), so this just makes them
+  // applies the transfers ai suggested, players already checked in the backend 
   function handleApplyChanges(changes) {
     let newPlayerIds = getPlayerIds()
 
@@ -127,27 +130,32 @@ function SquadPitch() {
       newPlayerIds.push(change.in_id)
     }
 
-    // same helper the import uses - rebuilds the pitch from a list of ids
+    // rebuilds the pitch from a list of ids
     setSquad(buildSquadFromPlayerIds(newPlayerIds, players))
-    setImportedBank(null) // same as a manual pick - the imported bank balance is out of date now
   }
 
   function handleImportTeam(playerIds, bank) {
     setSquad(buildSquadFromPlayerIds(playerIds, players))
-    setImportedBank(bank)
+
+    // an imported team's budget is what its players are worth today + the money
+    // in the bank - so it starts with exactly the bank left to spend
+    let squadValue = 0
+    for (const id of playerIds) {
+      const player = players.find((candidate) => candidate.id === id)
+      squadValue += player.now_cost
+    }
+
+    setBudget(Math.round((squadValue + bank) * 10) / 10)
   }
 
   return (
     <div className="squad-pitch">
       
       <div className="page-header">
-        {importedBank !== null ? (
-          <p className="budget-tracker">Bank: £{importedBank.toFixed(1)}m</p> // to fixed rounds to 1.dp
-        ) : (
-          <p className={budgetRemaining < 0 ? 'budget-tracker over-budget' : 'budget-tracker'}>
-            Budget remaining: £{budgetRemaining.toFixed(1)}m / £100.0m
-          </p>
-        )}
+        {/* toFixed(1) shows 1 d.p. */}
+        <p className={budgetRemaining < 0 ? 'budget-tracker over-budget' : 'budget-tracker'}>
+          Budget remaining: £{budgetRemaining.toFixed(1)}m / £{budget.toFixed(1)}m
+        </p>
 
         <InfoButton />
       </div>
@@ -211,6 +219,7 @@ function SquadPitch() {
                 key={`${openSlot.position}-${openSlot.index}`}
                 position={openSlot.position}
                 otherPlayerIds={otherPlayerIdsForOpenSlot}
+                budget={budget}
                 onSelectPlayer={handleSelectPlayer}
               />
 
@@ -230,7 +239,7 @@ function SquadPitch() {
         </div>
       </div>
 
-      <AskAI playerIds={getPlayerIds()} onApplyChanges={handleApplyChanges} />
+      <AskAI playerIds={getPlayerIds()} budget={budget} onApplyChanges={handleApplyChanges} />
     </div>
   )
 }

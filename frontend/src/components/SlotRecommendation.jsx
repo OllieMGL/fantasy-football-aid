@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
-function SlotRecommendation({ position, otherPlayerIds, onSelectPlayer }) {
+function SlotRecommendation({ position, otherPlayerIds, budget, onSelectPlayer }) {
   const [result, setResult] = useState(null)
 
   function handleRecommend() {
     fetch('http://127.0.0.1:5000/recommend-slot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ player_ids: otherPlayerIds, position }),
+      body: JSON.stringify({ player_ids: otherPlayerIds, position, budget }),
     })
       .then((response) => response.json())
       .then((data) => setResult(data))

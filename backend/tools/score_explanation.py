@@ -18,9 +18,6 @@ WEIGHTS_BY_POSITION = {
     "FWD": FORWARD_WEIGHTS,
 }
 
-# Maps a position code to the name of the SQLAlchemy relationship on Player
-# that holds that position's stats. Used with getattr() below to pick the
-# right stats object for a player without an if/elif per position -
 # e.g. "MID" -> "midfielder_stats" -> player.midfielder_stats
 STATS_RELATIONSHIP_BY_POSITION = {
     "GKP": "goalkeeper_stats",
@@ -73,7 +70,8 @@ def find_player_by_name(name, session):
     return None
 
 
-def call_explain_player_score(player_name, player_ids, session):
+# budget not needed but needs to be passed 
+def call_explain_player_score(player_name, player_ids, session, budget):
 
     player = find_player_by_name(player_name, session)
 
@@ -83,9 +81,6 @@ def call_explain_player_score(player_name, player_ids, session):
     score_function = SCORE_FUNCTIONS_BY_POSITION[player.position]
     score = score_function(session).get(player.id)
 
-    # pull the raw, position-specific numbers straight off the stats row -
-    # everything the scoring algorithm actually sees, without hand-listing
-    # them per position - generic across all four stats tables
     stats_object = getattr(player, STATS_RELATIONSHIP_BY_POSITION[player.position]) #
     raw_stats = {
         column.name: getattr(stats_object, column.name)

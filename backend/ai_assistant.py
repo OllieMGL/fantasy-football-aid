@@ -8,9 +8,6 @@ from sqlalchemy.orm import sessionmaker
 from db import engine
 from tools import TOOLS, TOOL_FUNCTIONS
 
-# DeepSeek picks the right tool
-# → scoring algorithm runs against database
-# → DeepSeek phrases the real result in plain English
 load_dotenv()
 
 client = OpenAI(
@@ -23,7 +20,7 @@ Session = sessionmaker(bind=engine)
 MODEL = "deepseek-v4-flash"
 
 
-def ask(user_message, player_ids):
+def ask(user_message, player_ids, budget):
     session = Session()
 
     messages = [
@@ -51,12 +48,10 @@ def ask(user_message, player_ids):
     response = client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS)
     message = response.choices[0].message
 
-    # the last VALID set of changes the model proposed - sent to the frontend so the
-    # user can apply it. Invalid proposals only go back to the model, never the user
     proposed = None
 
-    # the model can ask for a tool, get the result, and ask for another tool before
-    # it's ready to answer in words - so this keeps going until it stops asking
+    # asks for a tool, get the result, and ask for another tool
+    # this keeps going until it stops asking
     while message.tool_calls:
         messages.append({
             "role": "assistant",
@@ -77,7 +72,8 @@ def ask(user_message, player_ids):
         for call in message.tool_calls:
             function = TOOL_FUNCTIONS[call.function.name]
             arguments = json.loads(call.function.arguments)  # the model sends args back as a JSON string
-            result = function(player_ids=player_ids, session=session, **arguments)
+            
+            result = function(player_ids=player_ids, session=session, budget=budget, **arguments)
 
             # only a proposal that passed every check is kept for the user
             if call.function.name == "propose_changes":
@@ -95,6 +91,5 @@ def ask(user_message, player_ids):
 
     session.close()
 
-    # two things back now: the text answer, and the changes (or None if there aren't any)
     return message.content, proposed
 
