@@ -152,11 +152,12 @@ def ask_endpoint():
         return jsonify({"error": "message is required"}), 400
 
     try:
-        reply = ask(message, player_ids)
+        reply, proposed_changes = ask(message, player_ids)
     except Exception:
         return jsonify({"error": "The AI assistant is unavailable right now. Please try again."}), 502
 
-    return jsonify({"reply": reply})
+    # proposed_changes is None unless the AI suggested transfers that passed validation
+    return jsonify({"reply": reply, "proposed_changes": proposed_changes})
 
 
 if __name__ == "__main__":

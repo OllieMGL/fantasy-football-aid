@@ -52,6 +52,7 @@ def call_recommend_for_slot(position, player_ids, session):
     return {
         "suggestions": [
             {
+                "id": s["player"].id,
                 "name": f"{s['player'].first_name} {s['player'].second_name}",
                 "price": s["player"].now_cost,
                 "score": s["score"],
