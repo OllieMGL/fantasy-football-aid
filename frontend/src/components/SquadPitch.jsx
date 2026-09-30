@@ -113,6 +113,25 @@ function SquadPitch() {
       })
   }
 
+  // applies the transfers the AI suggested. They were already checked by the
+  // backend (budget, positions, club limit), so this just makes them
+  function handleApplyChanges(changes) {
+    let newPlayerIds = getPlayerIds()
+
+    for (const change of changes) {
+      // out_id is null when the AI is filling an empty slot - nobody to remove
+      if (change.out_id !== null) {
+        newPlayerIds = newPlayerIds.filter((id) => id !== change.out_id)
+      }
+
+      newPlayerIds.push(change.in_id)
+    }
+
+    // same helper the import uses - rebuilds the pitch from a list of ids
+    setSquad(buildSquadFromPlayerIds(newPlayerIds, players))
+    setImportedBank(null) // same as a manual pick - the imported bank balance is out of date now
+  }
+
   function handleImportTeam(playerIds, bank) {
     setSquad(buildSquadFromPlayerIds(playerIds, players))
     setImportedBank(bank)
@@ -211,7 +230,7 @@ function SquadPitch() {
         </div>
       </div>
 
-      <AskAI playerIds={getPlayerIds()} />
+      <AskAI playerIds={getPlayerIds()} onApplyChanges={handleApplyChanges} />
     </div>
   )
 }
