@@ -1,5 +1,7 @@
 # Fantasy Football Aid
 
+**[Try it live](https://fantasy-football-aid.vercel.app/)** - the first load can take up to a minute while the free server wakes up.
+
 A Fantasy Premier League (FPL) assistant. Build a squad, or import your real one by team ID. The app scores every player in the league with its own algorithm and suggests who to add or upgrade within your budget. The app has an AI assistant that can explain its reasoning and make the necessary transfers for you to improve your squad!
 
 Built with React, Flask, Tailwind CSS, SQLite and DeepSeek, using live data from the official FPL API.
