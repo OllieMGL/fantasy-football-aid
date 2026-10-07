@@ -32,6 +32,13 @@ Built with React, Flask, Tailwind CSS, SQLite and DeepSeek, using live data from
 - **Fresh data**: Player data comes from the official FPL API and is stored in SQLite. It refreshes automatically when the server starts if it's more than 12 hours old, so prices and stats stay current.
 - **Tested**: The pytest suite runs against an in-memory database of made-up players, so the results don't change as real prices change. It covers the budget and squad rules, the recommendation logic, and the checks behind the AI's Apply button.
 
+## Deployment
+
+- **Frontend** is hosted on Vercel; **backend** on Render (free tier, so it sleeps when idle - hence the slow first load).
+- Both redeploy automatically on every push to `main`.
+- The frontend reads the backend address from `VITE_API_URL`, so the same code points at `127.0.0.1` locally and at Render in production.
+- The backend runs under gunicorn in production instead of Flask's development server.
+
 ## Running locally
 
 Needs Python, Node.js and a [DeepSeek API key](https://platform.deepseek.com/) in a `.env` file in the project root: `DEEPSEEK_API_KEY=your-key-here`
