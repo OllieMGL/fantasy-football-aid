@@ -132,6 +132,24 @@ def test_ignores_a_player_outside_the_price_window(session):
     assert result is None
 
 
+def test_ignores_a_player_you_cannot_afford(session):
+    # the better player is inside the ±0.5m window, but with only 0.2m left
+    # the most we can pay is 5.0 + 0.2 = 5.2m
+    weak = make_player(1, "DEF", cost=5.0, team_id=1)
+    too_dear = make_player(10, "DEF", cost=5.5, team_id=2)
+    add_players(session, [weak, too_dear])
+
+    result = find_replacement(
+        weak, session,
+        all_scores={1: 10.0, 10: 99.0},
+        current_team_ids=[1],
+        club_counts=count_by_club([weak]),
+        money_left=0.2,
+    )
+
+    assert result is None
+
+
 def test_never_suggests_a_player_already_in_the_squad(session):
     weak = make_player(1, "DEF", cost=5.0, team_id=1)
     already_owned = make_player(2, "DEF", cost=5.0, team_id=2)

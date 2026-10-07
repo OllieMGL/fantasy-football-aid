@@ -1,14 +1,11 @@
-# test budget is held back for the empty slots and player prices that
-# drift up and push budget over 100 million does not produce negative budget 
+# tests the budget rule: money left = budget - what the squad costs.
+# budget is 100m for a squad built by hand, or whatever the frontend sends for
+# an imported one (squad value + bank). Money is also held back for empty slots
 
 import pytest
 
 from conftest import make_player, add_players
-from recommend_player import (
-    get_max_price_for_slot, recommend_for_slot, BUDGET_LIMIT, PRICE_DRIFT_BUFFER,
-)
-
-STARTING_BUDGET = BUDGET_LIMIT + PRICE_DRIFT_BUFFER  # 100.5
+from recommend_player import get_max_price_for_slot, recommend_for_slot, BUDGET_LIMIT
 
 
 def build(counts, start_id, cost):
@@ -22,12 +19,12 @@ def build(counts, start_id, cost):
     return players
 
 
-def test_empty_squad_has_the_whole_budget_available(session):
+def test_empty_squad_has_exactly_100m(session):
     add_players(session, build({"GKP": 2, "DEF": 5, "MID": 5, "FWD": 3}, 100, cost=4.0))
 
     budget_remaining, _ = get_max_price_for_slot("GKP", [], [], session)
 
-    assert budget_remaining == pytest.approx(STARTING_BUDGET)
+    assert budget_remaining == pytest.approx(BUDGET_LIMIT)
 
 
 def test_budget_remaining_is_what_is_left_after_what_is_spent(session):
@@ -38,12 +35,24 @@ def test_budget_remaining_is_what_is_left_after_what_is_spent(session):
         "DEF", squad, [player.id for player in squad], session
     )
 
-    assert budget_remaining == pytest.approx(STARTING_BUDGET - 12.0)
+    assert budget_remaining == pytest.approx(BUDGET_LIMIT - 12.0)
 
 
-def test_a_squad_worth_more_than_the_cap_does_not_go_negative(session):
-    # 15 players at 7.0 = 105.0m, i.e. above the 100.0m cap because prices rose
-    # after they were bought. The budget must clamp, not go to -4.5
+def test_an_imported_budget_above_100m_is_used(session):
+    # an imported squad worth 105.0m (prices rose) with 0.5m in the bank -
+    # the frontend sends 105.5m, so there's 0.5m left, not -5.0m
+    squad = build({"GKP": 2, "DEF": 5, "MID": 5, "FWD": 3}, 1, cost=7.0)
+    add_players(session, squad)
+
+    budget_remaining, _ = get_max_price_for_slot(
+        "DEF", squad, [player.id for player in squad], session, budget=105.5
+    )
+
+    assert budget_remaining == pytest.approx(0.5)
+
+
+def test_a_hand_built_squad_over_100m_has_negative_money_left(session):
+    # same 105.0m squad, but no budget sent, so the strict 100m applies
     squad = build({"GKP": 2, "DEF": 5, "MID": 5, "FWD": 3}, 1, cost=7.0)
     add_players(session, squad)
 
@@ -51,8 +60,7 @@ def test_a_squad_worth_more_than_the_cap_does_not_go_negative(session):
         "DEF", squad, [player.id for player in squad], session
     )
 
-    assert budget_remaining == pytest.approx(PRICE_DRIFT_BUFFER)
-    assert budget_remaining > 0
+    assert budget_remaining == pytest.approx(-5.0)
 
 
 def test_money_is_reserved_for_other_empty_slots_but_not_this_one(session):
@@ -64,7 +72,7 @@ def test_money_is_reserved_for_other_empty_slots_but_not_this_one(session):
     _, max_price = get_max_price_for_slot("GKP", [], [], session)
 
     slots_still_to_fill = 15 - 1
-    assert max_price == pytest.approx(STARTING_BUDGET - slots_still_to_fill * available_cost)
+    assert max_price == pytest.approx(BUDGET_LIMIT - slots_still_to_fill * available_cost)
 
 
 def test_each_position_reserves_its_own_cheapest_player(session):
@@ -75,13 +83,13 @@ def test_each_position_reserves_its_own_cheapest_player(session):
     _, max_price = get_max_price_for_slot("GKP", [], [], session)
 
     expected_reserved = (1 * 4.0) + (3 * 9.0)  # DEF/MID have no players available, so reserve 0
-    assert max_price == pytest.approx(STARTING_BUDGET - expected_reserved)
+    assert max_price == pytest.approx(BUDGET_LIMIT - expected_reserved)
 
 
 def test_an_overcommitted_squad_gives_no_suggestions_rather_than_an_error(session):
-    # 10 expensive players picked, 5 slots still empty and not enough left for any players 
+    # 10 expensive players picked, 5 slots still empty and not enough left for any players
 
-    squad = build({"GKP": 2, "DEF": 5, "MID": 3}, 1, cost=9.0)  
+    squad = build({"GKP": 2, "DEF": 5, "MID": 3}, 1, cost=9.0)
     pool = build({"MID": 3, "FWD": 3}, 100, cost=8.0)
     add_players(session, squad + pool)
 
@@ -96,4 +104,4 @@ def test_an_overcommitted_squad_gives_no_suggestions_rather_than_an_error(sessio
     )
 
     assert result["suggestions"] == []
-    assert result["max_price_for_slot"] == pytest.approx(max_price, abs=0.05)  
+    assert result["max_price_for_slot"] == pytest.approx(max_price, abs=0.05)
