@@ -22,15 +22,6 @@ Built with React, Flask, SQLite and DeepSeek, using live data from the official 
 
   ![The AI assistant suggesting a transfer and applying it to the squad](docs/gifs/ai-apply-changes.gif)
 
-## How to use
-
-Enter your FPL team ID in the **FPL Team ID** box and click **Import Team** to load your current squad, or click any shirt on the pitch to pick players one by one. The budget tracker at the top shows what you have left to spend.
-
-Click **Get Recommendations** to see who to add to each position, or who to upgrade if the position is already full.
-
-Ask the assistant on the right a question, such as *"who should I bring in for defence?"*. If it suggests transfers, click **Apply these changes** under its answer to make them.
-
-Click the **i** in the top right corner at any time for an explanation of how players are scored.
 
 ## Implementation details
 
