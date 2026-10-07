@@ -19,7 +19,7 @@ function AskAI({ playerIds, budget, onApplyChanges }) {
     setProposedChanges(null)
     setQuestion('')
 
-    fetch('http://127.0.0.1:5000/ask', {
+    fetch(`${import.meta.env.VITE_API_URL}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: asked, player_ids: playerIds, budget }),

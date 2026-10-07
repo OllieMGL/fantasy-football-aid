@@ -42,7 +42,7 @@ function SquadPitch() {
   const [serverError, setServerError] = useState(null)
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/players')
+    fetch(`${import.meta.env.VITE_API_URL}/players`)
       .then((response) => response.json())
       .then((data) => setPlayers(data))
       // fetch only rejects on a network failure, so this is the "backend isn't
@@ -81,7 +81,7 @@ function SquadPitch() {
   }
 
   function handleScoreTeam() {
-    fetch('http://127.0.0.1:5000/score-team', {
+    fetch(`${import.meta.env.VITE_API_URL}/score-team`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player_ids: getPlayerIds() }),
@@ -94,7 +94,7 @@ function SquadPitch() {
   function handleGetRecommendations() {
     setRecommendationsLoading(true)
 
-    fetch('http://127.0.0.1:5000/recommendations', {
+    fetch(`${import.meta.env.VITE_API_URL}/recommendations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player_ids: getPlayerIds(), budget }),

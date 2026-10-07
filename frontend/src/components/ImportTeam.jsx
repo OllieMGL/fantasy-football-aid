@@ -8,7 +8,7 @@ function ImportTeam({ onImport }) {
   function handleImport() {
     setError(null)
 
-    fetch(`http://127.0.0.1:5000/import-team/${teamId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/import-team/${teamId}`)
       // fetch only rejects on network failure, not on 404/409 - so we pair the
       // parsed body with response.ok here to know which case we're in below
       .then((response) => response.json().then((data) => ({ ok: response.ok, data })))

@@ -4,7 +4,7 @@ function SlotRecommendation({ position, otherPlayerIds, budget, onSelectPlayer }
   const [result, setResult] = useState(null)
 
   function handleRecommend() {
-    fetch('http://127.0.0.1:5000/recommend-slot', {
+    fetch(`${import.meta.env.VITE_API_URL}/recommend-slot`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player_ids: otherPlayerIds, position, budget }),
