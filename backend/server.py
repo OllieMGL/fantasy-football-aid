@@ -15,6 +15,14 @@ app = Flask(__name__)
 CORS(app)
 Session = sessionmaker(bind=engine)
 
+# runs whenever this file is loaded - both "python server.py" and gunicorn,
+# which imports the file instead of running it directly
+try:
+    if refresh_checker():
+        print("FPL data was stale - refreshed.")
+except Exception as error:
+    print(f"Could not refresh FPL data, using what's already stored: {error}")
+
 
 def create_player(player):
     if player is None:
@@ -161,11 +169,4 @@ def ask_endpoint():
 
 
 if __name__ == "__main__":
-
-    try:
-        if refresh_checker():
-            print("FPL data was stale - refreshed.")
-    except Exception as error:
-        print(f"Could not refresh FPL data, using what's already stored: {error}")
-
     app.run(debug=True)
