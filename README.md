@@ -2,25 +2,25 @@
 
 A Fantasy Premier League (FPL) assistant. Build a squad, or import your real one by team ID. The app scores every player in the league with its own algorithm, suggests who to add or upgrade within your budget. The app has an AI assistant that can explain its reasoning and make the necessary transfers for you to improve your squad!
 
-![The AI assistant suggesting a transfer and applying it to the squad](docs/gifs/ai-apply-changes.gif)
-
 Built with React, Flask, SQLite and DeepSeek, using live data from the official FPL API.
 
 ## Features
 
-**Import your real team.** Enter your FPL team ID and your squad loads onto the pitch. Your budget is your squad's value plus your bank, the same as in the real game.
+- **Import your real team.** Enter your FPL team ID and your squad loads onto the pitch. Your budget is your squad's value plus your bank, the same as in the real game.
 
-![Importing a team by ID](docs/gifs/import-team.gif)
+  ![Importing a team by ID](docs/gifs/import-team.gif)
 
-**Recommendations for the whole squad.** One click checks every position. It suggests players to **add** where a position isn't full, and an **upgrade** for your weakest player where it is. Every suggestion stays within your budget and the squad rules.
+- **Recommendations for the whole squad.** One click checks every position. It suggests players to **add** where a position isn't full, and an **upgrade** for your weakest player where it is. Every suggestion stays within your budget and the squad rules.
 
-![Getting recommendations](docs/gifs/recommendations.gif)
+  ![Getting recommendations](docs/gifs/recommendations.gif)
 
-**Build a squad slot by slot.** Click any shirt to pick a player, or ask for the best-scoring options that fit that slot and your remaining budget.
+- **Build a squad slot by slot.** Click any shirt to pick a player, or ask for the best-scoring options that fit that slot and your remaining budget.
 
-![Building a squad slot by slot](docs/gifs/build-squad.gif)
+  ![Building a squad slot by slot](docs/gifs/build-squad.gif)
 
-**An AI assistant that can change your team.** Ask in plain English, such as *"who should I bring in for defence?"*. When it recommends transfers, an **Apply these changes** button appears under its answer, as in the GIF at the top.
+- **An AI assistant that can change your team.** Ask in plain English, such as *"who should I bring in for defence?"*. When it recommends transfers, an **Apply these changes** button appears under its answer. 
+
+  ![The AI assistant suggesting a transfer and applying it to the squad](docs/gifs/ai-apply-changes.gif)
 
 ## How to use
 
@@ -47,7 +47,3 @@ Needs Python, Node.js and a [DeepSeek API key](https://platform.deepseek.com/) i
 cd backend && pip install -r requirements.txt && python server.py   # terminal 1
 cd frontend && npm install && npm run dev                           # terminal 2
 ```
-
-## License
-
-[MIT](LICENSE)
