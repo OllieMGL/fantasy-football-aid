@@ -1,19 +1,3 @@
-"""
-Pulls the FPL data into the local database.
-
-Two ways in:
-  refresh_data()     - always refreshes, used by "python load_data.py"
-  refresh_if_stale() - only refreshes if the data is older than MAX_DATA_AGE,
-                       which is what server.py calls on startup
-
-Everything is written with session.merge rather than session.add. add only ever
-INSERTS, so re-running it over an existing database failed on duplicate primary
-keys - the only way to refresh used to be deleting fpl_advisor.db first. merge
-updates a row if its primary key already exists and inserts it if not, so this
-is now safe to run over and over: it picks up changed prices, points and form,
-and adds players who are new to the game since the last run.
-"""
-
 from sqlalchemy.orm import sessionmaker
 from models import (
     Base, Player, Team, Fixture, DataRefresh,
@@ -60,8 +44,7 @@ def refresh_data():
 
     for fixture_data in fixtures:
 
-        # need to .replace("Z", "+00:00") as date is sent in this format "2026-08-15T19:00:00Z"
-        # and datetime expects an actutal date time, not a string. ==> date time allows for real date time comparisons 
+
         kickoff_raw = fixture_data["kickoff_time"]
 
         # need to check if it exists, some games dates are yet to be determined. 

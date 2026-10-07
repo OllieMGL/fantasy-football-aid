@@ -77,8 +77,6 @@ def recommendations_endpoint():
     session = Session()
     recommendations = get_recommendations(player_ids, session, budget=budget)
 
-    # swap the Player objects for plain dicts - the rest of each entry is
-    # already plain data and passes straight through
     result = {}
     for position, info in recommendations.items():
         entry = {**info}

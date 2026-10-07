@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-// the circled "i" in the top right, and the panel it opens
 function InfoButton() {
   const [open, setOpen] = useState(false)
 

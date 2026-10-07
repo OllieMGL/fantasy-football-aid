@@ -70,30 +70,3 @@ def check_valid_team(players):
             errors.append(f"Too many players from team_id {team_id} ({count}, max is 3).")
 
     return errors
-
-
-def main():
-    selected_player_ids = [82, 201, 505, 31, 154, 480, 397, 165, 411, 346, 497, 539, 423, 338, 40]
-
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    team_players = get_players_by_ids(selected_player_ids, session)
-
-    errors = check_valid_team(team_players)
-    if errors:
-        print("Team is invalid:")
-        for error in errors:
-            print(" -", error)
-        return
-
-    team_average = score_team(selected_player_ids, session)
-
-    for p in team_players:
-        print(p.first_name, p.second_name)
-
-    print(f"\nOverall team score: {team_average}/100")
-
-
-if __name__ == "__main__":
-    main()

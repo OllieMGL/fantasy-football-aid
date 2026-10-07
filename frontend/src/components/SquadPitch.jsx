@@ -16,7 +16,7 @@ function buildSquadFromPlayerIds(playerIds, playersList) {
     const player = playersList.find((candidate) => candidate.id === id)
 
     const index = positionCounts[player.position]
-    newSquad[`${player.position}-${index}`] = player //a ssigns the full player object to that slot in newSquad
+    newSquad[`${player.position}-${index}`] = player //assigns the full player object to that slot in newSquad
     positionCounts[player.position] += 1
   }
 
@@ -35,13 +35,8 @@ function SquadPitch() {
   const [scoreResult, setScoreResult] = useState(null)
   const [recommendationsResult, setRecommendationsResult] = useState(null)
 
-  // recommendations score the whole league, so it takes a moment - without this
-  // the button looks like it did nothing
   const [recommendationsLoading, setRecommendationsLoading] = useState(false)
 
-  // 100m for a squad built by hand. Importing a team changes it to that squad's
-  // value + its bank - see handleImportTeam. Sent to the backend with every
-  // request that needs it, so the whole app uses the same number
   const [budget, setBudget] = useState(100)
 
   const [serverError, setServerError] = useState(null)
@@ -60,8 +55,7 @@ function SquadPitch() {
     // .reduce takes the array down to one value ==> total money spent
     .reduce((total, player) => total + player.now_cost, 0) // inital value is 0
 
-  // rounded to 1 d.p. - adding up prices like 5.1 + 4.3 gives tiny float errors,
-  // which could show as "-0.0" and turn the tracker red for no reason
+  // rounded to 1 d.p. 
   const budgetRemaining = Math.round((budget - amountSpent) * 10) / 10
 
   // every filled slot EXCEPT the one currently open - passed to SlotRecommendation
@@ -77,7 +71,6 @@ function SquadPitch() {
     const slotId = `${openSlot.position}-${openSlot.index}`
 
     setSquad({ ...squad, [slotId]: player })
-    console.log('selected player for', slotId, ':', player)
     setOpenSlot(null)
   }
 

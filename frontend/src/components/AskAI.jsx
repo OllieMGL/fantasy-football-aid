@@ -32,7 +32,7 @@ function AskAI({ playerIds, budget, onApplyChanges }) {
       })
       .catch(() => {
         setReply("Can't reach the server. Is the backend running?")
-        setLoading(false) // otherwise it stays stuck on "Thinking..."
+        setLoading(false)
       })
   }
 

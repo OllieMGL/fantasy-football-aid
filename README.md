@@ -2,7 +2,7 @@
 
 A Fantasy Premier League (FPL) assistant. Build a squad, or import your real one by team ID. The app scores every player in the league with its own algorithm, suggests who to add or upgrade within your budget. The app has an AI assistant that can explain its reasoning and make the necessary transfers for you to improve your squad!
 
-Built with React, Flask, SQLite and DeepSeek, using live data from the official FPL API.
+Built with React, Flask, Tailwind CSS, SQLite and DeepSeek, using live data from the official FPL API.
 
 ## Features
 

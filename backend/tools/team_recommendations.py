@@ -9,8 +9,8 @@ TOOL_SCHEMA = {
             "Covers all four positions at once. Each position comes back with an "
             "'action': 'fill' means the squad is short there, so the suggestions "
             "listed are players to ADD; 'upgrade' means it's already full, so it "
-            "gives the weakest current player and a similarly-priced replacement "
-            "that scores higher (or null if nothing better exists). Also reports "
+            "gives the weakest current player and a replacement you can afford "
+            "that scores higher (or null if nothing better is affordable). Also reports "
             "filled/required/missing counts per position."
         ),
         "parameters": {

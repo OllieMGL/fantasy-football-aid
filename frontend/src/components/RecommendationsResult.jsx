@@ -1,6 +1,3 @@
-// displays the outcome of a whole-team "Get Recommendations" request. Each
-// position comes back marked either "fill" (short of players - here's who to
-// add) or "upgrade" (already full - here's a better player for the weakest one)
 function RecommendationsResult({ result, onClose }) {
   if (!result) return null // nothing to show until recommendations have been requested
 
@@ -60,7 +57,7 @@ function RecommendationsResult({ result, onClose }) {
                 </p>
               ) : (
                 <p className="recommendation-empty">
-                  No better replacement found in a similar price range.
+                  No better replacement found that you can afford.
                 </p>
               )}
             </>

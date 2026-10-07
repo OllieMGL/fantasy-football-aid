@@ -43,12 +43,10 @@ body {
   flex-shrink: 0;
 }
 
-/* right of the shirts: action buttons on top, player-selection panel below when a slot is open */
 .side-column {
   @apply flex flex-col gap-4 w-80 flex-shrink-0;
 }
 
-/* smaller, side by side, sitting right under the shirts */
 .action-buttons-row {
   @apply flex gap-2 mt-4;
 }
@@ -166,7 +164,6 @@ body {
   margin: 0 0 4px;
 }
 
-/* "2 of 5 picked - 3 to add" sub-line on a position that needs filling */
 .recommendation-meta {
   @apply text-xs text-gray-500 mb-1;
 }
@@ -179,7 +176,6 @@ body {
   @apply py-1 border-b border-gray-200 last:border-b-0;
 }
 
-/* "nothing affordable" / "no better replacement" messages */
 .recommendation-empty {
   @apply text-sm text-gray-500 italic;
 }
@@ -237,7 +233,6 @@ body {
   @apply w-7 h-7 rounded-full border border-emerald-700 bg-white text-emerald-700 text-sm font-semibold cursor-pointer transition-colors hover:border-emerald-800 hover:text-emerald-800;
 }
 
-/* z-50 so it sits above the AI chat panel, which is fixed to the right edge */
 .info-overlay {
   @apply fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6;
 }

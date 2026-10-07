@@ -210,14 +210,13 @@ def recommend_for_slot(position, other_player_ids, session, all_scores=None, bud
 # everything feeds into this function 
 def get_recommendations(selected_player_ids, session, all_scores=None, budget=BUDGET_LIMIT):
 
-    # One entry per position, always all four. "action" says which kind it is:
+    # One entry per position, "action" says which kind it is:
     #   "fill"    - short of players, so suggest who to ADD
     #   "upgrade" - already full, so suggest a better player for the weakest one
-    # A complete 15 puts every position on "upgrade"
 
     team_players = get_players_by_ids(selected_player_ids, session)
 
-    # scored once here, then passed down - see the note at the top of the file
+    # scored once here, then passed down
     if all_scores is None:
         all_scores = get_all_scores(session)
 
