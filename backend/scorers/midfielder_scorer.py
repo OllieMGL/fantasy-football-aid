@@ -41,7 +41,6 @@ def calculate_ranges(midfielders, session):
 
     fixture_difficulty_values = [
         team_difficulties[p.team_id] for p in midfielders
-        if team_difficulties[p.team_id] is not None
     ]
 
     expected_returns_values = [

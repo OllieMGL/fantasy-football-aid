@@ -43,7 +43,6 @@ def calculate_ranges(goalkeepers, session):
 
     fixture_difficulty_values = [
         team_difficulties[p.team_id] for p in goalkeepers
-        if team_difficulties[p.team_id] is not None
     ]
 
     cards_values = [

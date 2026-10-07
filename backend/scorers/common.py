@@ -1,6 +1,9 @@
 from sqlalchemy import or_
 from models import Fixture
 
+# 3 is average rating - used when no fixtures left in season 
+AVERAGE_DIFFICULTY = 3
+
 
 def normalise(value, min_value, max_value):
     if max_value == min_value:
@@ -21,7 +24,7 @@ def get_fixture_difficulty(team_id, session):
     )
 
     if not upcoming_fixtures:
-        return None  # no upcoming fixtures found for this team
+        return AVERAGE_DIFFICULTY  # no fixtures left for this team
 
     difficulties = []
 

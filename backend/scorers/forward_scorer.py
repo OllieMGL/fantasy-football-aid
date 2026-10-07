@@ -42,7 +42,6 @@ def calculate_ranges(forwards, session):
 
     fixture_difficulty_values = [
         team_difficulties[p.team_id] for p in forwards
-        if team_difficulties[p.team_id] is not None
     ]
 
     cards_values = [

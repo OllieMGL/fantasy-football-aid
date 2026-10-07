@@ -41,7 +41,6 @@ def calculate_ranges(defenders, session):
 
     fixture_difficulty_values = [
         team_difficulties[p.team_id] for p in defenders
-        if team_difficulties[p.team_id] is not None
     ]
 
     attacking_returns_values = [
