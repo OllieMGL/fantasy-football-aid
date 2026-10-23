@@ -22,7 +22,7 @@ Built with React, Flask, Tailwind CSS, SQLite and DeepSeek, using live data from
 
 - **An AI assistant that can change your team** - Ask for recommendations in plain English, such as *"who should I bring in for defence?"*. When it recommends transfers, an **Apply these changes** button appears under its answer. Click it to have the AI's changes made automatically.
 
-  ![The AI assistant suggesting a transfer and applying it to the squad](docs/gifs/ai-apply-changes.gif)
+  ![The AI assistant suggesting a transfer and applying it to the squad](docs/gifs/ai_chatbot.gif)
 
 
 ## Implementation details
